@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using NetQueStore.exe201.Models;
+
 namespace NetQueStore.exe201
 {
     public class Program
@@ -8,9 +11,10 @@ namespace NetQueStore.exe201
 
             // Add services to the container.
             builder.Services.AddRazorPages();
-            // builder.Services.AddDbContext<>(options =>
-            //    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-            //);
+
+            builder.Services.AddDbContext<Exe2Context>(options =>
+               options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+           );
 
             var app = builder.Build();
 
