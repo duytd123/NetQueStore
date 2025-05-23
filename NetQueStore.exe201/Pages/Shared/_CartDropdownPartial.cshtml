@@ -1,0 +1,123 @@
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@inject NetQueStore.exe201.Models.Exe2Context _context
+@using Microsoft.EntityFrameworkCore
+
+@{
+    string cookieValue = HttpContextAccessor.HttpContext.Request.Cookies["shopping_cart"] ?? "";
+    List<int> foodIds = !string.IsNullOrEmpty(cookieValue) ?
+        cookieValue.Split('-', StringSplitOptions.RemoveEmptyEntries).Select(x => int.TryParse(x, out int id) ? id : 0).Where(id => id > 0).ToList() : new();
+
+    Dictionary<int, int> foodQuantities = new();
+    foreach (var id in foodIds) foodQuantities[id] = foodQuantities.ContainsKey(id) ? foodQuantities[id] + 1 : 1;
+
+    var foodsInCart = _context.Foods.Include(f => f.FoodImages).Where(f => foodQuantities.Keys.Contains(f.Id) && f.IsActive).ToList();
+
+    decimal subtotal = foodsInCart.Sum(f => f.Price * foodQuantities[f.Id]);
+
+    string? provinceIdStr = HttpContextAccessor.HttpContext.Session.GetString("province_id");
+    int provinceId = int.TryParse(provinceIdStr, out int pid) ? pid : 1;
+    decimal shippingFee = _context.ShippingFees.Where(sf => sf.ProvinceId == provinceId).OrderByDescending(sf => sf.CreatedAt).FirstOrDefault()?.Fee ?? 30000;
+
+    decimal total = subtotal + shippingFee;
+}
+
+@if (foodIds.Count == 0)
+{
+    <li class="text-center text-muted">Your cart is empty.</li>
+}
+else
+{
+    <li>
+        <div style="max-height: 300px; overflow-y: auto;">
+            @foreach (var item in foodsInCart)
+            {
+                int qty = foodQuantities[item.Id];
+                <div class="d-flex align-items-center mb-2">
+                    <img src="/images/foods/@(item.FoodImages.FirstOrDefault(fi => fi.IsPrimary)?.Filename ?? "default.png")" width="50" class="rounded" alt="@item.Name" />
+                    <div class="ms-2 flex-grow-1">
+                        <strong>@item.Name</strong> <br />
+                        <small>
+                            <button class="btn btn-sm btn-outline-secondary px-2 py-0" onclick="return updateCart('decrease', @item.Id)">-</button>
+                            <span class="mx-1">@qty</span>
+                            <button class="btn btn-sm btn-outline-secondary px-2 py-0" onclick="return updateCart('increase', @item.Id)">+</button>
+                            x @(item.Price.ToString("N0")) ₫ = @((qty * item.Price).ToString("N0"))
+                        </small>
+                    </div>
+                    <a href="#" class="text-danger" onclick="return updateCart('delete', @item.Id)">Xóa</a>
+                </div>
+            }
+        </div>
+    </li>
+    <li><hr class="dropdown-divider" /></li>
+    <li class="d-flex justify-content-between">
+        <span>Subtotal:</span>
+        <span>@subtotal.ToString("N0") ₫</span>
+    </li>
+    <li class="d-flex justify-content-between">
+        <span>ShipFee:</span>
+        <span>@shippingFee.ToString("N0") ₫</span>
+    </li>
+    <li class="d-flex justify-content-between fw-bold">
+        <span>Total:</span>
+        <span>@total.ToString("N0") ₫</span>
+    </li>
+    <li><hr class="dropdown-divider" /></li>
+    <li class="d-flex justify-content-between">
+        <a href="/Cart" class="btn btn-sm btn-primary flex-grow-1 me-1">VIEW CART</a>
+        <a href="/Checkout" class="btn btn-sm btn-success flex-grow-1 ms-1">CHECKOUT</a>
+    </li>
+}
+
+<script>
+    function updateCart(action, id) {
+        let url = '';
+        const cookieValue = getCookieValue("shopping_cart");
+        let parts = cookieValue ? cookieValue.split('-').filter(x => x.length > 0) : [];
+
+        // Cập nhật mảng parts dựa trên hành động
+        if (action === 'delete') {
+            parts = parts.filter(x => x != id.toString());
+            url = `/Cart/DeletePartial?id=${id}`;
+        } else if (action === 'increase') {
+            parts.push(id.toString());
+            url = `/Cart/AddPartial?id=${id}`;
+        } else if (action === 'decrease') {
+            const index = parts.indexOf(id.toString());
+            if (index >= 0) parts.splice(index, 1);
+            url = `/Cart/DecreasePartial?id=${id}`;
+        }
+
+        // Cập nhật lại cookie trên trình duyệt (client-side)
+        const newCookie = parts.join('-');
+        const expiresDate = new Date();
+        expiresDate.setDate(expiresDate.getDate() + 365);
+        document.cookie = `shopping_cart=${newCookie};expires=${expiresDate.toUTCString()};path=/`;
+
+        // Gửi request để lấy lại nội dung partial
+        if (url) {
+            fetch(url)
+                .then(res => res.text())
+                .then(html => {
+                    // Cập nhật dropdown
+                    document.getElementById("CartDropdownContent").innerHTML = html;
+
+                    // Cập nhật số lượng món hiển thị trên biểu tượng cart
+                    document.getElementById("FoodCountBadge").innerText = parts.length;
+                });
+        }
+
+        return false;
+    }
+
+    function getCookieValue(cookieName) {
+        const cookiesArray = document.cookie.split(';');
+        for (let i = 0; i < cookiesArray.length; i++) {
+            const cookie = cookiesArray[i].trim();
+            if (cookie.startsWith(cookieName + '=')) {
+                return cookie.substring(cookieName.length + 1);
+            }
+        }
+        return '';
+    }
+</script>
+

@@ -3,49 +3,193 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - WebApplication1</title>
+    <title>@ViewData["Title"] - Net Que Store</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/WebApplication1.styles.css" asp-append-version="true" />
+    @* <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" /> *@
+    <link rel="stylesheet" href="~/css/siteDUY.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
 </head>
 <body>
+    <script>
+        function addToCart(button, foodID) {
+            let oldCartValue = getCookieValue("shopping_cart");
+            if (oldCartValue) oldCartValue += "-";
+            let newCartValue = oldCartValue + foodID;
+
+            let d = new Date();
+            d.setDate(d.getDate() + 365);
+            let expires = d.toUTCString();
+            document.cookie = "shopping_cart=" + newCartValue + ";expires=" + expires + ";path=/";
+
+            const badge = document.getElementById("FoodCountBadge");
+            const foodsArray = newCartValue.split("-");
+            badge.innerHTML = foodsArray.length;
+            button.innerHTML = "Added <i class='bi bi-check-lg'></i>";
+            setTimeout(() => {
+            button.innerHTML = "Add to Cart <i class='bi bi-cart4'></i>";
+        }, 3000);
+
+            fetch('/Cart/Partial')
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById("CartDropdownContent").innerHTML = html;
+                });
+        }
+
+        function getCookieValue(cookieName) {
+            let cookiesArray = document.cookie.split(';');
+            for (let i = 0; i < cookiesArray.length; i++) {
+                let cookie = cookiesArray[i].trim();
+                if (cookie.startsWith(cookieName + '=')) {
+                    return cookie.substring(cookieName.length + 1);
+                }
+            }
+            return "";
+        }
+    </script>
+
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+    @inject NetQueStore.exe201.Models.Exe2Context _context
+    @using Microsoft.EntityFrameworkCore
+
+    @{
+        string cookieValue = HttpContextAccessor.HttpContext.Request.Cookies["shopping_cart"] ?? "";
+        List<int> foodIds = new List<int>();
+        if (!string.IsNullOrEmpty(cookieValue))
+        {
+            foodIds = cookieValue.Split('-', StringSplitOptions.RemoveEmptyEntries)
+            .Select(x =>
+            {
+                int.TryParse(x, out int id);
+                return id;
+            })
+            .Where(id => id > 0)
+            .ToList();
+        }
+
+        Dictionary<int, int> foodQuantities = new();
+        foreach (var id in foodIds)
+        {
+            if (foodQuantities.ContainsKey(id))
+                foodQuantities[id]++;
+            else
+                foodQuantities[id] = 1;
+        }
+
+        var foodsInCart = _context.Foods
+        .Include(f => f.FoodImages)
+        .Where(f => foodQuantities.Keys.Contains(f.Id) && f.IsActive)
+        .ToList();
+
+        decimal subtotal = 0;
+        foreach (var food in foodsInCart)
+        {
+            int qty = foodQuantities[food.Id];
+            subtotal += food.Price * qty;
+        }
+
+        string? provinceIdStr = HttpContextAccessor.HttpContext.Session.GetString("province_id");
+        int provinceId = 1;
+        if (!string.IsNullOrEmpty(provinceIdStr) && int.TryParse(provinceIdStr, out int pid))
+        {
+            provinceId = pid;
+        }
+
+        decimal shippingFee = 0;
+        var shippingFeeEntity = _context.ShippingFees
+        .Where(sf => sf.ProvinceId == provinceId)
+        .OrderByDescending(sf => sf.CreatedAt)
+        .FirstOrDefault();
+
+        if (shippingFeeEntity != null)
+        {
+            shippingFee = shippingFeeEntity.Fee;
+        }
+        else
+        {
+            shippingFee = 30000;
+        }
+
+        decimal total = subtotal + shippingFee;
+
+        int cartSize = foodIds.Count;
+    }
+
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">WebApplication1</a>
+                <a class="navbar-brand" asp-area="" asp-page="/Index">
+                    <img src="/images/icon.png" width="30" height="30" alt="" /> Net Que Store
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
+                    </ul>
+
+                    <ul class="navbar-nav">
+
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                            <a class="nav-link text-dark me-3" href="/Order" title="Tra cứu đơn hàng">
+                                <i class="bi bi-search h4"></i>
+                            </a>
+
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark me-2" href="/Cart" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-cart4 text-danger h3"></i>
+                                <span id="FoodCountBadge" class="badge rounded-pill bg-danger" style="vertical-align: top;">
+                                    @cartSize
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="cartDropdown" style="min-width: 320px;" id="CartDropdownContent">
+                                @await Html.PartialAsync("_CartDropdownPartial")
+                            </ul>
                         </li>
+
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
+
+    @if (ViewData["NoContainer"] == null)
+    {
+        <div class="container mt-3">
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
+        </div>
+    }
+    else
+    {
+        @RenderBody()
+    }
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2025 - WebApplication1 - <a asp-area="" asp-page="/Privacy">Privacy</a>
+            &copy; 2025 - Net Que Store - <a asp-area="" asp-page="/Privacy">Privacy</a>
         </div>
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.dropdown-menu').forEach(function (dropdown) {
+                dropdown.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                });
+            });
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

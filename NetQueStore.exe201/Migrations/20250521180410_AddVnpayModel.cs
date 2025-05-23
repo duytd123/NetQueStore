@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace NetQueStore.exe201.Migrations
 {
     /// <inheritdoc />
-    public partial class createdatabase : Migration
+    public partial class AddVnpayModel : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -226,6 +226,24 @@ namespace NetQueStore.exe201.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK__users__3213E83F2694C156", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "VnInfos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    OrderDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TransactionId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OrderId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PaymentMethod = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PaymentId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VnPayResponseCode = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VnInfos", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -789,27 +807,29 @@ namespace NetQueStore.exe201.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     order_number = table.Column<string>(type: "varchar(50)", unicode: false, maxLength: 50, nullable: false),
                     user_id = table.Column<int>(type: "int", nullable: true),
+                    session_id = table.Column<string>(type: "nchar(10)", fixedLength: true, maxLength: 10, nullable: true),
+                    guest_email = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     order_date = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())"),
-                    subtotal = table.Column<decimal>(type: "decimal(16,2)", nullable: false),
-                    tax = table.Column<decimal>(type: "decimal(16,2)", nullable: false),
-                    shipping_fee = table.Column<decimal>(type: "decimal(16,2)", nullable: false),
-                    discount = table.Column<decimal>(type: "decimal(16,2)", nullable: false),
+                    subtotal = table.Column<decimal>(type: "decimal(16,2)", nullable: true),
+                    tax = table.Column<decimal>(type: "decimal(16,2)", nullable: true),
+                    shipping_fee = table.Column<decimal>(type: "decimal(16,2)", nullable: true),
+                    discount = table.Column<decimal>(type: "decimal(16,2)", nullable: true),
                     coupon_id = table.Column<int>(type: "int", nullable: true),
-                    gift_wrapping_fee = table.Column<decimal>(type: "decimal(16,2)", nullable: false),
+                    gift_wrapping_fee = table.Column<decimal>(type: "decimal(16,2)", nullable: true),
                     total_amount = table.Column<decimal>(type: "decimal(16,2)", nullable: false),
                     recipient_name = table.Column<string>(type: "varchar(200)", unicode: false, maxLength: 200, nullable: false),
-                    recipient_phone = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: false),
+                    recipient_phone = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true),
                     recipient_email = table.Column<string>(type: "varchar(150)", unicode: false, maxLength: 150, nullable: true),
-                    province_id = table.Column<int>(type: "int", nullable: false),
-                    district_id = table.Column<int>(type: "int", nullable: false),
-                    ward_id = table.Column<int>(type: "int", nullable: false),
-                    delivery_address = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: false),
+                    province_id = table.Column<int>(type: "int", nullable: true),
+                    district_id = table.Column<int>(type: "int", nullable: true),
+                    ward_id = table.Column<int>(type: "int", nullable: true),
+                    delivery_address = table.Column<string>(type: "varchar(255)", unicode: false, maxLength: 255, nullable: true),
                     delivery_notes = table.Column<string>(type: "text", nullable: true),
-                    payment_method_id = table.Column<int>(type: "int", nullable: false),
+                    payment_method_id = table.Column<int>(type: "int", nullable: true),
                     bank_id = table.Column<int>(type: "int", nullable: true),
                     transaction_id = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: true),
-                    payment_status = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: false),
-                    order_status = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: false),
+                    payment_status = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true),
+                    order_status = table.Column<string>(type: "varchar(20)", unicode: false, maxLength: 20, nullable: true),
                     shipping_provider = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: true),
                     shipping_method = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: true),
                     tracking_number = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: true),
@@ -910,11 +930,11 @@ namespace NetQueStore.exe201.Migrations
                     id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     order_id = table.Column<int>(type: "int", nullable: false),
-                    food_id = table.Column<int>(type: "int", nullable: false),
-                    product_name = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: false),
-                    quantity = table.Column<int>(type: "int", nullable: false),
+                    food_id = table.Column<int>(type: "int", nullable: true),
+                    product_name = table.Column<string>(type: "varchar(100)", unicode: false, maxLength: 100, nullable: true),
+                    quantity = table.Column<int>(type: "int", nullable: true),
                     unit_price = table.Column<decimal>(type: "decimal(16,2)", nullable: false),
-                    subtotal = table.Column<decimal>(type: "decimal(16,2)", nullable: false),
+                    subtotal = table.Column<decimal>(type: "decimal(16,2)", nullable: true),
                     created_at = table.Column<DateTime>(type: "datetime", nullable: false, defaultValueSql: "(getdate())")
                 },
                 constraints: table =>
@@ -1292,6 +1312,9 @@ namespace NetQueStore.exe201.Migrations
 
             migrationBuilder.DropTable(
                 name: "shipping_fees");
+
+            migrationBuilder.DropTable(
+                name: "VnInfos");
 
             migrationBuilder.DropTable(
                 name: "wishlists");
