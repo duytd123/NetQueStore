@@ -85,11 +85,16 @@ public partial class Exe2Context : DbContext
 
     public virtual DbSet<Wishlist> Wishlists { get; set; }
 
+    public virtual DbSet<VnpayModel> VnInfos { get; set; }
+
+    public virtual DbSet<VnpayPayment> VnpayPayments { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         var config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
         optionsBuilder.UseSqlServer(config.GetConnectionString("DefaultConnection"));
     }
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ActivityLog>(entity =>
@@ -867,6 +872,9 @@ public partial class Exe2Context : DbContext
             entity.Property(e => e.GiftWrappingFee)
                 .HasColumnType("decimal(16, 2)")
                 .HasColumnName("gift_wrapping_fee");
+            entity.Property(e => e.GuestEmail)
+                .HasMaxLength(50)
+                .HasColumnName("guest_email");
             entity.Property(e => e.Notes)
                 .HasColumnType("text")
                 .HasColumnName("notes");
@@ -900,6 +908,10 @@ public partial class Exe2Context : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("recipient_phone");
+            entity.Property(e => e.SessionId)
+                .HasMaxLength(10)
+                .IsFixedLength()
+                .HasColumnName("session_id");
             entity.Property(e => e.ShippingFee)
                 .HasColumnType("decimal(16, 2)")
                 .HasColumnName("shipping_fee");
@@ -1441,6 +1453,48 @@ public partial class Exe2Context : DbContext
                 .HasForeignKey(d => d.DistrictId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__wards__district___1F98B2C1");
+        });
+
+        modelBuilder.Entity<VnpayPayment>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__vnpay_pa__3213E83FEC94D892");
+
+            entity.ToTable("vnpay_payments");
+
+            entity.HasIndex(e => new { e.OrderId, e.TransactionId }, "FK_vnpay_order_transaction").IsUnique();
+
+            entity.HasIndex(e => e.TransactionId, "UQ__vnpay_pa__85C600AE3D95F5C2").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.DateCreated)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("date_created");
+            entity.Property(e => e.OrderDescription)
+                .HasMaxLength(255)
+                .HasColumnName("order_description");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.PaymentId)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("payment_id");
+            entity.Property(e => e.PaymentMethod)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("payment_method");
+            entity.Property(e => e.TransactionId)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("transaction_id");
+            entity.Property(e => e.VnpayResponseCode)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("vnpay_response_code");
+
+            entity.HasOne(d => d.Order).WithMany(p => p.VnpayPayments)
+                .HasForeignKey(d => d.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__vnpay_pay__order__7E02B4CC");
         });
 
         modelBuilder.Entity<Wishlist>(entity =>

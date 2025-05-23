@@ -1,0 +1,101 @@
+﻿@page "{id:int}"
+@model NetQueStore.exe201.Pages.OrderCompleteModel
+@{
+    ViewData["Title"] = "Đặt hàng thành công";
+}
+
+<div class="container py-5">
+    <div class="text-center mb-4">
+        <h2 class="text-success fw-bold">
+            <i class="bi bi-check-circle-fill"></i> Đặt hàng thành công!
+        </h2>
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success mt-3" role="alert">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger mt-3" role="alert">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="bi bi-receipt"></i> Thông tin đơn hàng</h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <p><strong>Mã đơn hàng:</strong> @Model.Order.OrderNumber</p>
+                    <p><strong>Ngày đặt:</strong> @Model.Order.OrderDate.ToString("dd/MM/yyyy")</p>
+                    <p><strong>Người nhận:</strong> @Model.Order.RecipientName</p>
+                    <p><strong>Email:</strong> @Model.Order.RecipientEmail</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Địa chỉ giao hàng:</strong> @Model.Order.DeliveryAddress</p>
+                    <p><strong>Số điện thoại:</strong> @Model.Order.RecipientPhone</p>
+                    <p><strong>Phương thức thanh toán:</strong> @Model.Order.PaymentMethod?.Name</p>
+                    <p>
+                        <strong>Trạng thái thanh toán:</strong>
+                        @if (Model.Order.PaymentStatus == "paid")
+                        {
+                            <span class="badge bg-success"><i class="bi bi-check-circle"></i> Đã thanh toán</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-circle"></i> Chưa thanh toán</span>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="bi bi-box-seam"></i> Danh sách sản phẩm</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-bordered mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th class="text-center">Số lượng</th>
+                        <th class="text-end">Đơn giá</th>
+                        <th class="text-end">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Order.OrderItems)
+                    {
+                        <tr>
+                            <td>@item.ProductName</td>
+                            <td class="text-center">@item.Quantity</td>
+                            <td class="text-end">@item.UnitPrice.ToString("N0") ₫</td>
+                            <td class="text-end">@(((decimal)item.Quantity * (decimal)item.UnitPrice).ToString("N0")) ₫</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end fw-bold">Tổng cộng:</td>
+                        <td class="text-end fw-bold text-danger">@Model.Order.TotalAmount.ToString("N0") ₫</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a class="btn btn-outline-primary me-2" href="/">
+            <i class="bi bi-house-door"></i> Quay lại trang chủ
+        </a>
+        <a class="btn btn-success" href="/Order?GuestEmail=@Model.Order.RecipientEmail">
+            <i class="bi bi-list-check"></i> Xem các đơn hàng của bạn
+        </a>
+    </div>
+</div>

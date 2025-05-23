@@ -12,8 +12,8 @@ using NetQueStore.exe201.Models;
 namespace NetQueStore.exe201.Migrations
 {
     [DbContext(typeof(Exe2Context))]
-    [Migration("20250515153140_createdatabase")]
-    partial class createdatabase
+    [Migration("20250521180410_AddVnpayModel")]
+    partial class AddVnpayModel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1188,7 +1188,6 @@ namespace NetQueStore.exe201.Migrations
                         .HasDefaultValueSql("(getdate())");
 
                     b.Property<string>("DeliveryAddress")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .IsUnicode(false)
                         .HasColumnType("varchar(255)")
@@ -1198,11 +1197,11 @@ namespace NetQueStore.exe201.Migrations
                         .HasColumnType("text")
                         .HasColumnName("delivery_notes");
 
-                    b.Property<decimal>("Discount")
+                    b.Property<decimal?>("Discount")
                         .HasColumnType("decimal(16, 2)")
                         .HasColumnName("discount");
 
-                    b.Property<int>("DistrictId")
+                    b.Property<int?>("DistrictId")
                         .HasColumnType("int")
                         .HasColumnName("district_id");
 
@@ -1210,9 +1209,14 @@ namespace NetQueStore.exe201.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("estimated_delivery");
 
-                    b.Property<decimal>("GiftWrappingFee")
+                    b.Property<decimal?>("GiftWrappingFee")
                         .HasColumnType("decimal(16, 2)")
                         .HasColumnName("gift_wrapping_fee");
+
+                    b.Property<string>("GuestEmail")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("guest_email");
 
                     b.Property<string>("Notes")
                         .HasColumnType("text")
@@ -1232,24 +1236,22 @@ namespace NetQueStore.exe201.Migrations
                         .HasColumnName("order_number");
 
                     b.Property<string>("OrderStatus")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .IsUnicode(false)
                         .HasColumnType("varchar(20)")
                         .HasColumnName("order_status");
 
-                    b.Property<int>("PaymentMethodId")
+                    b.Property<int?>("PaymentMethodId")
                         .HasColumnType("int")
                         .HasColumnName("payment_method_id");
 
                     b.Property<string>("PaymentStatus")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .IsUnicode(false)
                         .HasColumnType("varchar(20)")
                         .HasColumnName("payment_status");
 
-                    b.Property<int>("ProvinceId")
+                    b.Property<int?>("ProvinceId")
                         .HasColumnType("int")
                         .HasColumnName("province_id");
 
@@ -1267,13 +1269,18 @@ namespace NetQueStore.exe201.Migrations
                         .HasColumnName("recipient_name");
 
                     b.Property<string>("RecipientPhone")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .IsUnicode(false)
                         .HasColumnType("varchar(20)")
                         .HasColumnName("recipient_phone");
 
-                    b.Property<decimal>("ShippingFee")
+                    b.Property<string>("SessionId")
+                        .HasMaxLength(10)
+                        .HasColumnType("nchar(10)")
+                        .HasColumnName("session_id")
+                        .IsFixedLength();
+
+                    b.Property<decimal?>("ShippingFee")
                         .HasColumnType("decimal(16, 2)")
                         .HasColumnName("shipping_fee");
 
@@ -1289,11 +1296,11 @@ namespace NetQueStore.exe201.Migrations
                         .HasColumnType("varchar(100)")
                         .HasColumnName("shipping_provider");
 
-                    b.Property<decimal>("Subtotal")
+                    b.Property<decimal?>("Subtotal")
                         .HasColumnType("decimal(16, 2)")
                         .HasColumnName("subtotal");
 
-                    b.Property<decimal>("Tax")
+                    b.Property<decimal?>("Tax")
                         .HasColumnType("decimal(16, 2)")
                         .HasColumnName("tax");
 
@@ -1321,7 +1328,7 @@ namespace NetQueStore.exe201.Migrations
                         .HasColumnType("int")
                         .HasColumnName("user_id");
 
-                    b.Property<int>("WardId")
+                    b.Property<int?>("WardId")
                         .HasColumnType("int")
                         .HasColumnName("ward_id");
 
@@ -1363,7 +1370,7 @@ namespace NetQueStore.exe201.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(getdate())");
 
-                    b.Property<int>("FoodId")
+                    b.Property<int?>("FoodId")
                         .HasColumnType("int")
                         .HasColumnName("food_id");
 
@@ -1372,17 +1379,16 @@ namespace NetQueStore.exe201.Migrations
                         .HasColumnName("order_id");
 
                     b.Property<string>("ProductName")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .IsUnicode(false)
                         .HasColumnType("varchar(100)")
                         .HasColumnName("product_name");
 
-                    b.Property<int>("Quantity")
+                    b.Property<int?>("Quantity")
                         .HasColumnType("int")
                         .HasColumnName("quantity");
 
-                    b.Property<decimal>("Subtotal")
+                    b.Property<decimal?>("Subtotal")
                         .HasColumnType("decimal(16, 2)")
                         .HasColumnName("subtotal");
 
@@ -2046,6 +2052,43 @@ namespace NetQueStore.exe201.Migrations
                     b.ToTable("users", (string)null);
                 });
 
+            modelBuilder.Entity("NetQueStore.exe201.Models.VnpayModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("OrderDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OrderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaymentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TransactionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VnPayResponseCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VnInfos");
+                });
+
             modelBuilder.Entity("NetQueStore.exe201.Models.Ward", b =>
                 {
                     b.Property<int>("Id")
@@ -2360,19 +2403,16 @@ namespace NetQueStore.exe201.Migrations
                     b.HasOne("NetQueStore.exe201.Models.District", "District")
                         .WithMany("Orders")
                         .HasForeignKey("DistrictId")
-                        .IsRequired()
                         .HasConstraintName("FK__orders__district__4B7734FF");
 
                     b.HasOne("NetQueStore.exe201.Models.PaymentMethod", "PaymentMethod")
                         .WithMany("Orders")
                         .HasForeignKey("PaymentMethodId")
-                        .IsRequired()
                         .HasConstraintName("FK__orders__payment___489AC854");
 
                     b.HasOne("NetQueStore.exe201.Models.Province", "Province")
                         .WithMany("Orders")
                         .HasForeignKey("ProvinceId")
-                        .IsRequired()
                         .HasConstraintName("FK__orders__province__4A8310C6");
 
                     b.HasOne("NetQueStore.exe201.Models.User", "User")
@@ -2383,7 +2423,6 @@ namespace NetQueStore.exe201.Migrations
                     b.HasOne("NetQueStore.exe201.Models.Ward", "Ward")
                         .WithMany("Orders")
                         .HasForeignKey("WardId")
-                        .IsRequired()
                         .HasConstraintName("FK__orders__ward_id__4C6B5938");
 
                     b.Navigation("Bank");
@@ -2406,7 +2445,6 @@ namespace NetQueStore.exe201.Migrations
                     b.HasOne("NetQueStore.exe201.Models.Food", "Food")
                         .WithMany("OrderItems")
                         .HasForeignKey("FoodId")
-                        .IsRequired()
                         .HasConstraintName("FK__order_ite__food___51300E55");
 
                     b.HasOne("NetQueStore.exe201.Models.Order", "Order")

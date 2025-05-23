@@ -1,5 +1,6 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using NetQueStore.exe201.Models;
+using NetQueStore.exe201.Services.Vnpay;
 
 namespace NetQueStore.exe201
 {
@@ -16,6 +17,22 @@ namespace NetQueStore.exe201
                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
            );
 
+            builder.Services.AddHttpContextAccessor();
+
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole(); // Hiển thị log ra terminal của VS Code
+            builder.Logging.SetMinimumLevel(LogLevel.Debug);
+
+
+            builder.Services.AddScoped<IVnPayService, VnPayService>();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -26,10 +43,14 @@ namespace NetQueStore.exe201
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseStatusCodePages();
+
+            app.UseSession(); 
 
             app.UseAuthorization();
 
