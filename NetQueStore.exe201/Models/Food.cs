@@ -7,7 +7,7 @@ public partial class Food
 {
     public int Id { get; set; }
 
-    public string Name { get; set; } = null!;
+    public string Name { get; set; }    = null!;
 
     public string Slug { get; set; } = null!;
 
@@ -21,9 +21,9 @@ public partial class Food
 
     public decimal Price { get; set; }
 
-    public decimal? SalePrice { get; set; }
+    public decimal? SalePrice { get; set; } = null!;
 
-    public int StockQuantity { get; set; }
+    public int StockQuantity { get; set; } = null!;
 
     public string Unit { get; set; } = null!;
 

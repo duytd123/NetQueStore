@@ -4,13 +4,13 @@ using NetQueStore.exe201.Models;
 using NetQueStore.exe201.Services.Payos;
 using NetQueStore.exe201.Services.Vnpay;
 
-namespace NetQueStore.exe201
+namespace NetQueStore.exe201;
+
+public class Program
 {
-    public class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+        var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddRazorPages();
 
@@ -68,7 +68,7 @@ namespace NetQueStore.exe201
             //app.UseHttpsRedirection();
             app.UseStaticFiles();
 
-            app.UseRouting();
+        app.UseRouting();
 
             app.UseStatusCodePages();
 
@@ -76,9 +76,8 @@ namespace NetQueStore.exe201
 
             app.UseAuthorization();
 
-            app.MapRazorPages();
+        app.MapRazorPages();
 
-            app.Run();
-        }
+        app.Run();
     }
 }
