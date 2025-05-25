@@ -11,6 +11,12 @@ public partial class Cart
 
     public string SessionId { get; set; } = null!;
 
+    public string? CustomerEmail { get; set; }
+
+    public string? CustomerName { get; set; }
+
+    public string? CustomerPhone { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }

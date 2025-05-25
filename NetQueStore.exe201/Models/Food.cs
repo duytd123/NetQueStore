@@ -71,6 +71,8 @@ public partial class Food
 
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
+    public virtual ICollection<OutOfStockNotification> OutOfStockNotifications { get; set; } = new List<OutOfStockNotification>();
+
     public virtual Province Province { get; set; } = null!;
 
     public virtual Region Region { get; set; } = null!;

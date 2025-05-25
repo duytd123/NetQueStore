@@ -1,0 +1,139 @@
+﻿@page "/Order"
+@model NetQueStore.exe201.Pages.Order.IndexModel
+@{
+    ViewData["Title"] = "Danh sách đơn hàng";
+}
+
+<style>
+    /* Hover row table hiệu ứng shadow + background */
+    tbody tr:hover {
+        background-color: #e3f2fd;
+        box-shadow: 0 2px 8px rgb(0 123 255 / 0.25);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    /* Pagination đẹp hơn */
+    .pagination .page-link {
+        color: #08618d;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #08618d;
+        color: white;
+        font-weight: 600;
+    }
+
+    .pagination .page-link:hover {
+        background-color: #0a75c2;
+        color: white;
+    }
+
+    /* Card cho form */
+    .search-card {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Animation fade-in bảng */
+    .fade-in {
+        animation: fadeIn 0.6s ease forwards;
+        opacity: 0;
+    }
+
+    }
+
+    /* Badge có icon */
+    .badge-paid::before {
+        content: "✔️ ";
+    }
+
+    .badge-unpaid::before {
+        content: "⏳ ";
+    }
+</style>
+
+<div class="container py-4">
+    <h3 class="text-center text-white p-3 rounded mb-4" style="background-color: #08618d; max-width: 600px; margin: auto;">
+        Tra cứu đơn hàng
+    </h3>
+
+    <form method="get" class="search-card">
+        <div class="input-group">
+            <input type="text" name="SearchTerm" class="form-control" placeholder="Nhập mã đơn hàng hoặc số điện thoại" value="@Model.SearchTerm" required />
+            <button type="submit" class="btn btn-primary">Tra cứu</button>
+        </div>
+    </form>
+
+    @if (Model.listOrders.Any())
+    {
+        <div class="table-responsive shadow-sm rounded fade-in">
+            <table class="table table-bordered table-hover align-middle text-nowrap">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Mã đơn</th>
+                        <th scope="col">Ngày</th>
+                        <th scope="col">Người nhận</th>
+                        <th scope="col">SĐT</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Số SP</th>
+                        <th scope="col">Tổng tiền</th>
+                        <th scope="col">Thanh toán</th>
+                        <th scope="col">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.listOrders)
+                    {
+                        var countItems = order.OrderItems.Sum(i => i.Quantity);
+                        <tr>
+                            <td>@order.OrderNumber</td>
+                            <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                            <td>@order.RecipientName</td>
+                            <td>@order.RecipientPhone</td>
+                            <td>@order.RecipientEmail</td>
+                            <td>@countItems</td>
+                            <td>@(order.TotalAmount.ToString("N0")) ₫</td>
+                            <td>@order.PaymentMethod?.Name</td>
+                            <td>
+                                @if (order.PaymentStatus?.ToLower() == "accepted" || order.PaymentStatus?.ToLower() == "paid")
+                                {
+                                    <span class="badge bg-success badge-paid">Đã thanh toán</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark badge-unpaid">Chưa thanh toán</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center mt-4">
+                @for (int i = 1; i <= Model.totalPages; i++)
+                {
+                    var activeClass = Model.page == i ? "active" : "";
+                    <li class="page-item @activeClass" aria-current="page">
+                        <a class="page-link" href="?SearchTerm=@Model.SearchTerm&page=@i">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+    else if (!string.IsNullOrEmpty(Model.SearchTerm))
+    {
+        <p class="text-danger text-center fs-5 mt-4">Không tìm thấy đơn hàng với mã đơn hoặc số điện thoại này.</p>
+    }
+</div>
+<link rel="stylesheet" href="~/siteDUY.css" />
+
