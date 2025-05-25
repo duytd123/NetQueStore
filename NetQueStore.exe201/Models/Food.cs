@@ -23,7 +23,7 @@ public partial class Food
 
     public decimal? SalePrice { get; set; } = null!;
 
-    public int StockQuantity { get; set; } = null!;
+    public int StockQuantity { get; set; }
 
     public string Unit { get; set; } = null!;
 
