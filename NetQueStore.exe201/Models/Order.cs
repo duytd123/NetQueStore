@@ -49,7 +49,7 @@ public partial class Order
 
     public int? PaymentMethodId { get; set; }
 
-    public int? BankId { get; set; }
+    public long? BankId { get; set; }
 
     public string? TransactionId { get; set; }
 
@@ -74,8 +74,6 @@ public partial class Order
     public DateTime CreatedAt { get; set; }
 
     public DateTime? UpdatedAt { get; set; }
-
-    public virtual Bank? Bank { get; set; }
 
     public virtual Coupon? Coupon { get; set; }
 

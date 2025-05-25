@@ -134,7 +134,7 @@ namespace NetQueStore.exe201.Pages
                 .OrderByDescending(sf => sf.CreatedAt)
                 .FirstOrDefault();
 
-            ShippingFee = shippingFeeEntity?.Fee ?? 30000; 
+            ShippingFee = shippingFeeEntity?.Fee ?? 10000; 
 
             Total = Subtotal + ShippingFee;
 

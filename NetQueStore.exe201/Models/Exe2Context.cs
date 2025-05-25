@@ -850,6 +850,7 @@ public partial class Exe2Context : DbContext
                 .HasColumnType("text")
                 .HasColumnName("admin_notes");
             entity.Property(e => e.BankId).HasColumnName("bank_id");
+
             entity.Property(e => e.CouponId).HasColumnName("coupon_id");
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
@@ -946,9 +947,9 @@ public partial class Exe2Context : DbContext
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.WardId).HasColumnName("ward_id");
 
-            entity.HasOne(d => d.Bank).WithMany(p => p.Orders)
-                .HasForeignKey(d => d.BankId)
-                .HasConstraintName("FK__orders__bank_id__498EEC8D");
+            //entity.HasOne(d => d.Bank).WithMany(p => p.Orders)
+            //    .HasForeignKey(d => d.BankId)
+            //    .HasConstraintName("FK__orders__bank_id__498EEC8D");
 
             entity.HasOne(d => d.Coupon).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.CouponId)

@@ -16,7 +16,7 @@
 
     string? provinceIdStr = HttpContextAccessor.HttpContext.Session.GetString("province_id");
     int provinceId = int.TryParse(provinceIdStr, out int pid) ? pid : 1;
-    decimal shippingFee = _context.ShippingFees.Where(sf => sf.ProvinceId == provinceId).OrderByDescending(sf => sf.CreatedAt).FirstOrDefault()?.Fee ?? 30000;
+    decimal shippingFee = _context.ShippingFees.Where(sf => sf.ProvinceId == provinceId).OrderByDescending(sf => sf.CreatedAt).FirstOrDefault()?.Fee ?? 10000;
 
     decimal total = subtotal + shippingFee;
 }
