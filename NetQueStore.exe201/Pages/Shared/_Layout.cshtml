@@ -15,7 +15,11 @@
     <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700,700i&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Amatic+SC:400,700&display=swap" rel="stylesheet">
-
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/siteDUY.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
 
@@ -34,10 +38,117 @@
     <link rel="stylesheet" href="~/css/style.css" />
 </head>
 
+    
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+    @inject NetQueStore.exe201.Models.Exe2Context _context
+    @using Microsoft.EntityFrameworkCore
+
+@{
+    string cookieValue = HttpContextAccessor.HttpContext.Request.Cookies["shopping_cart"] ?? "";
+    List<int> foodIds = new List<int>();
+    if (!string.IsNullOrEmpty(cookieValue))
+    {
+        foodIds = cookieValue.Split('-', StringSplitOptions.RemoveEmptyEntries)
+        .Select(x =>
+        {
+            int.TryParse(x, out int id);
+            return id;
+        })
+        .Where(id => id > 0)
+        .ToList();
+    }
+
+    Dictionary<int, int> foodQuantities = new();
+    foreach (var id in foodIds)
+    {
+        if (foodQuantities.ContainsKey(id))
+            foodQuantities[id]++;
+        else
+            foodQuantities[id] = 1;
+    }
+
+    var foodsInCart = _context.Foods
+    .Include(f => f.FoodImages)
+    .Where(f => foodQuantities.Keys.Contains(f.Id) && f.IsActive)
+    .ToList();
+
+    decimal subtotal = 0;
+    foreach (var food in foodsInCart)
+    {
+        int qty = foodQuantities[food.Id];
+        subtotal += food.Price * qty;
+    }
+
+    string? provinceIdStr = HttpContextAccessor.HttpContext.Session.GetString("province_id");
+    int provinceId = 1;
+    if (!string.IsNullOrEmpty(provinceIdStr) && int.TryParse(provinceIdStr, out int pid))
+    {
+        provinceId = pid;
+    }
+
+    decimal shippingFee = 0;
+    var shippingFeeEntity = _context.ShippingFees
+    .Where(sf => sf.ProvinceId == provinceId)
+    .OrderByDescending(sf => sf.CreatedAt)
+    .FirstOrDefault();
+
+    if (shippingFeeEntity != null)
+    {
+        shippingFee = shippingFeeEntity.Fee;
+    }
+    else
+    {
+        shippingFee = 10000;
+    }
+
+    decimal total = subtotal + shippingFee;
+
+    int cartSize = foodIds.Count;
+}
+
 <body class="goto-here">
+
+    <script>
+        function addToCart(button, foodID) {
+            let oldCartValue = getCookieValue("shopping_cart");
+            if (oldCartValue) oldCartValue += "-";
+            let newCartValue = oldCartValue + foodID;
+
+            let d = new Date();
+            d.setDate(d.getDate() + 365);
+            let expires = d.toUTCString();
+            document.cookie = "shopping_cart=" + newCartValue + ";expires=" + expires + ";path=/";
+
+            const badge = document.getElementById("FoodCountBadge");
+            const foodsArray = newCartValue.split("-");
+            badge.innerHTML = foodsArray.length;
+            button.innerHTML = "Added <i class='bi bi-check-lg'></i>";
+            setTimeout(() => {
+            button.innerHTML = "Add to Cart <i class='bi bi-cart4'></i>";
+        }, 3000);
+
+            fetch('/Cart/Partial')
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById("CartDropdownContent").innerHTML = html;
+                });
+        }
+
+        function getCookieValue(cookieName) {
+            let cookiesArray = document.cookie.split(';');
+            for (let i = 0; i < cookiesArray.length; i++) {
+                let cookie = cookiesArray[i].trim();
+                if (cookie.startsWith(cookieName + '=')) {
+                    return cookie.substring(cookieName.length + 1);
+                }
+            }
+            return "";
+        }
+    </script>
+
+
     <!-- HEADER -->
     <header>
-        
         <div class="py-1 bg-primary">
             <div class="container">
                 <div class="row no-gutters d-flex align-items-start align-items-center px-md-0">
@@ -59,33 +170,46 @@
                 </div>
             </div>
         </div>
+
         <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
             <div class="container">
-                <a class="navbar-brand" href="index.html">Nét Quê Store</a>
+                <a class="navbar-brand" asp-area="" asp-page="/Index">Nét Quê Store</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="oi oi-menu"></span> Menu
                 </button>
 
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
-                        <li class="nav-item active"><a href="index.html" class="nav-link">Trang Chủ</a></li>
+                        <li class="nav-item active"><a asp-page="/Index" class="nav-link">Trang Chủ</a></li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Shop</a>
                             <div class="dropdown-menu" aria-labelledby="dropdown04">
-                                <a class="dropdown-item" href="shop.html">Cửa Hàng</a>
-                                <a class="dropdown-item" href="wishlist.html">Wishlist</a>
-                                <a class="dropdown-item" href="product-single.html">Single Product</a>
-                                <a class="dropdown-item" href="cart.html">Cart</a>
-                                <a class="dropdown-item" href="checkout.html">Checkout</a>
+                                <a class="dropdown-item" asp-page="/Shop">Cửa Hàng</a>
+                                <a class="dropdown-item" asp-page="/Wishlist">Wishlist</a>
+                                <a class="dropdown-item" asp-page="/Product">Single Product</a>
+                                <a class="dropdown-item" asp-page="/Cart">Cart</a>
+                                <a class="dropdown-item" asp-page="/Checkout">Checkout</a>
                             </div>
                         </li>
-                        <li class="nav-item"><a href="about.html" class="nav-link">Liên Hệ</a></li>
-                        <li class="nav-item cta cta-colored"><a href="cart.html" class="nav-link"><span class="icon-shopping_cart"></span>[0]</a></li>
+                        <li class="nav-item"><a asp-page="/About" class="nav-link">Liên Hệ</a></li>
+
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle cta cta-colored" href="/Cart" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-cart4 text-warning h4"></i>
+                                <span id="FoodCountBadge" class="badge rounded-pill bg-danger" style="vertical-align: top;">
+                                    @cartSize
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="cartDropdown" style="min-width: 320px;" id="CartDropdownContent">
+                                @await Html.PartialAsync("_CartDropdownPartial")
+                            </ul>
+                        </li>
+
                     </ul>
                 </div>
             </div>
         </nav>
-         </header>
+    </header>
     <!-- BODY -->
     
     @if (ViewData["NoContainer"] == null)
@@ -164,9 +288,7 @@
                 <div class="col-md-12 text-center">
 
                     <p>
-                        <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
                         Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved
-                        <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
                     </p>
                 </div>
             </div>
@@ -192,7 +314,20 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
     <script src="~/js/google-map.js"></script>
     <script src="~/js/main.js"></script>
-    </body>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.dropdown-menu').forEach(function (dropdown) {
+                dropdown.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                });
+            });
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
 
+    </body>
 </html>
    
