@@ -1,6 +1,7 @@
-@page
+ï»¿@page
 @{
     ViewData["Title"] = "Dashboard";
+    Layout = "_AdminLayout";
 }
 @model NetQueStore.exe201.Pages.Admin.ManageProduct
 <div class="container-fluid">
@@ -31,6 +32,7 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
+                                <th>Images</th>
                                 <th>Name</th>
                                 <th>Slug</th>
                                 <th>Description</th>
@@ -59,6 +61,12 @@
                             {
                                 <tr>
                                     <td>@product.Id</td>
+                                    <td>
+                                        @foreach (var img in product.FoodImages)
+                                        {
+                                            <img src="@Url.Content("~" + img.Filename)" alt="Food Image" style="max-height: 80px; margin-right:5px;" />
+                                        }
+                                    </td>
                                     <td>@product.Name</td>
                                     <td>@product.Slug</td>
                                     <td>@product.Description</td>
@@ -132,12 +140,18 @@
                 <h5 class="modal-title" id="productModalLabel">Add New Product</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="productForm" method="post">
+            <form id="productForm" method="post" enctype="multipart/form-data" style="height:90vh;overflow-y:auto">
                 <input type="hidden" id="productId" name="Id" value="0">
                 <div class="modal-body">
                     <div class="row g-3">
                         <!-- Left Column -->
                         <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="images" class="form-label">Product Images</label>
+                                <input class="form-control" type="file" id="images" name="Images" accept="image/*" multiple>
+
+                                <div id="preview" class="d-flex flex-wrap gap-2 mt-2"></div>
+                            </div>
                             <div class="form-floating">
                                 <input type="text" class="form-control" id="name" name="Name" placeholder="Name" required>
                                 <label>Name</label>
@@ -332,7 +346,20 @@
                 fetch(`/Admin/ManageProduct?handler=GetProduct&id=${productId}`)
                     .then(response => response.json())
                     .then(product => {
-                        // Populate form fields
+                        const preview = document.getElementById('preview');
+                        preview.innerHTML = '';
+                        if (product.images && product.images.length > 0) {
+
+                            product.images.forEach(filename => {
+                                const imageUrl = filename;
+                                const imgElem = document.createElement('img');
+                                imgElem.src = imageUrl;
+                                imgElem.alt = 'Food Image';
+                                imgElem.style.maxHeight = '80px';
+                                imgElem.style.marginRight = '5px';
+                                preview.appendChild(imgElem);
+                            });
+                        }
                         document.getElementById('productId').value = product.id;
                         document.getElementById('name').value = product.name;
                         document.getElementById('slug').value = product.slug;
@@ -381,7 +408,7 @@
                     if (!response.ok) {
                         throw new Error('Network response was not ok.');
                     }
-                    // N?u thành công thì không c?n x? lý data JSON
+                    // N?u thï¿½nh cï¿½ng thï¿½ khï¿½ng c?n x? lï¿½ data JSON
                     productModal.hide();
                     location.reload();
                 })
@@ -411,5 +438,22 @@
                     });
             }
         }
+        document.getElementById("images").addEventListener("change", function () {
+            const preview = document.getElementById("preview");
+            preview.innerHTML = "";
+
+            Array.from(this.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.classList.add("img-thumbnail");
+                    img.style.maxHeight = "150px";
+                    img.style.marginRight = "10px";
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
     </script>
 }

@@ -2,8 +2,9 @@
 @model NetQueStore.exe201.Pages.Admin.Dashboard
 
 @{
-    ViewData["Title"] = "Dashboard Quản lý Sản phẩm & Đơn hàng";
+    Layout = "_AdminLayout";
 
+    ViewData["Title"] = "Dashboard Quản lý Sản phẩm & Đơn hàng";
     var status = ViewData["Status"] as IEnumerable<dynamic>;
     var chartData = ViewData["ChartData"] as IEnumerable<dynamic>;
     var labelsJson = System.Text.Json.JsonSerializer.Serialize(chartData.Select(c => c.Label));

@@ -7,9 +7,9 @@ namespace NetQueStore.exe201.Pages.Admin
 {
     public class Dashboard : PageModel
     {
-        private readonly DbexeContext _context;
+        private readonly Exe2Context _context;
 
-        public Dashboard(DbexeContext context)
+        public Dashboard(Exe2Context context)
         {
             _context = context;
         }

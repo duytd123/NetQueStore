@@ -10,41 +10,40 @@ namespace NetQueStore.exe201.Pages.Admin
 {
     public class ManageProduct : PageModel
     {
-        private readonly DbexeContext _context;
-
-        public ManageProduct(DbexeContext context)
+        private readonly Exe2Context _context;
+        private readonly IWebHostEnvironment _env;
+        public ManageProduct(Exe2Context context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
         public List<Food> Products { get; set; }
-        public List<Order> Orders { get; set; }
+        //public List<Order> Orders { get; set; }
         public List<Category> Categories { get; set; }
         public List<Region> Regions { get; set; }
         public List<Province> Provinces { get; set; }
-    
+
 
         public async Task OnGetAsync()
         {
             Products = await _context.Foods
                 .Include(f => f.Category)
                 .Include(f => f.Region)
+                .Include(f => f.FoodImages)
                 .OrderByDescending(f => f.CreatedAt)
                 .ToListAsync();
 
-            Orders = await _context.Orders
-                .Include(o => o.User)
-                .OrderByDescending(o => o.OrderDate)
-                .ToListAsync();
+        
 
             Categories = await _context.Categories.ToListAsync();
             Regions = await _context.Regions.ToListAsync();
             Provinces = await _context.Provinces.ToListAsync();
         }
 
-        public async Task<IActionResult> OnPostAddProductAsync(Food product)
+        public async Task<IActionResult> OnPostAddProductAsync(Food product, List<IFormFile> Images)
         {
- 
+
             try
             {
                 product.Slug = product.Name.ToLower().Replace(" ", "-");
@@ -52,6 +51,33 @@ namespace NetQueStore.exe201.Pages.Admin
                 product.CreatedAt = DateTime.UtcNow;
 
                 _context.Foods.Add(product);
+                await _context.SaveChangesAsync();
+
+                foreach (var image in Images)
+                {
+                    if (image.Length > 0)
+                    {
+                        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                        var filePath = Path.Combine(_env.WebRootPath, "uploads", fileName);
+
+                        Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await image.CopyToAsync(stream);
+                        }
+
+                        var foodImage = new FoodImage()
+                        {
+                            FoodId = product.Id,
+                            Filename = "/uploads/" + fileName,
+                            CreatedAt = DateTime.UtcNow
+                        };
+
+                        _context.FoodImages.Add(foodImage);
+                    }
+                }
+
                 await _context.SaveChangesAsync();
 
                 return RedirectToPage();
@@ -65,11 +91,45 @@ namespace NetQueStore.exe201.Pages.Admin
                 Provinces = await _context.Provinces.ToListAsync();
                 return Page();
             }
-           
+
         }
         public async Task<IActionResult> OnGetGetProductAsync(int id)
         {
-            var product = await _context.Foods.FindAsync(id);
+            var product = await _context.Foods
+                .Where(f => f.Id == id)
+                .Select(f => new
+                {
+                    f.Id,
+                    f.Name,
+                    f.Slug,
+                    f.Description,
+                    f.CategoryId,
+                    f.RegionId,
+                    f.ProvinceId,
+                    f.Price,
+                    f.SalePrice,
+                    f.StockQuantity,
+                    f.Unit,
+                    f.Weight,
+                    f.ShelfLife,
+                    f.StorageInstructions,
+                    f.IsFeatured,
+                    f.IsSpecial,
+                    f.IsVegetarian,
+                    f.IsActive,
+                    f.Ingredients,
+                    f.PreparationMethod,
+                    f.ServingSuggestion,
+                    f.CulturalSignificance,
+                    f.Allergens,
+                    f.Certification,
+                    f.CreatedAt,
+                    f.UpdatedAt,
+                    images = f.FoodImages.Select(fi => fi.Filename).ToList()
+                })
+                .FirstOrDefaultAsync();
+
+
             if (product == null)
                 return NotFound();
 
@@ -99,7 +159,7 @@ namespace NetQueStore.exe201.Pages.Admin
             return RedirectToPage();
         }
 
-        public async Task<IActionResult> OnPostEditProductAsync(Food product)
+        public async Task<IActionResult> OnPostEditProductAsync(Food product, List<IFormFile> Images)
         {
             try
             {
@@ -136,6 +196,38 @@ namespace NetQueStore.exe201.Pages.Admin
                 food.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
+                if (Images.Count > 0)
+                {
+                    var oldImages = await _context.FoodImages.Where(fi => fi.FoodId == product.Id).ToListAsync();
+
+                    _context.FoodImages.RemoveRange(oldImages);
+                    foreach (var image in Images)
+                    {
+                        if (image.Length > 0)
+                        {
+                            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                            var filePath = Path.Combine(_env.WebRootPath, "uploads", fileName);
+
+                            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await image.CopyToAsync(stream);
+                            }
+
+                            var foodImage = new FoodImage()
+                            {
+                                FoodId = product.Id,
+                                Filename = "/uploads/" + fileName,
+                                CreatedAt = DateTime.UtcNow
+                            };
+
+                            _context.FoodImages.Add(foodImage);
+                        }
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
 
                 return RedirectToPage();
             }
