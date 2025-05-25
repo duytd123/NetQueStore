@@ -75,9 +75,13 @@ public partial class Order
 
     public DateTime? UpdatedAt { get; set; }
 
+    public virtual Bank? Bank { get; set; }
+
     public virtual Coupon? Coupon { get; set; }
 
     public virtual District? District { get; set; }
+
+    public virtual ICollection<GuestOrdersTracking> GuestOrdersTrackings { get; set; } = new List<GuestOrdersTracking>();
 
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 

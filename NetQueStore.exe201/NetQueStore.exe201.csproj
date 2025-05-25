@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <Folder Include="Pages\Order\" />
+    <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 
 </Project>

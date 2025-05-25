@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -29,8 +30,8 @@
             badge.innerHTML = foodsArray.length;
             button.innerHTML = "Added <i class='bi bi-check-lg'></i>";
             setTimeout(() => {
-            button.innerHTML = "Add to Cart <i class='bi bi-cart4'></i>";
-        }, 3000);
+                button.innerHTML = "Add to Cart <i class='bi bi-cart4'></i>";
+            }, 3000);
 
             fetch('/Cart/Partial')
                 .then(res => res.text())

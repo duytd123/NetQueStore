@@ -12,13 +12,11 @@ namespace NetQueStore.exe201
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
             builder.Services.AddRazorPages();
 
             builder.Services.AddDbContext<Exe2Context>(options =>
                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
            );
-
             builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddSession(options =>
