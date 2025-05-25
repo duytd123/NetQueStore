@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using NetQueStore.exe201.Models;
+using NetQueStore.exe201.Models.PayOs;
 using NetQueStore.exe201.Models.Vnpay;
+using NetQueStore.exe201.Services.Payos;
 using NetQueStore.exe201.Services.Vnpay;
 using System.ComponentModel.DataAnnotations;
 
@@ -12,19 +14,20 @@ namespace NetQueStore.exe201.Pages
     {
         private readonly Exe2Context _context;
         private readonly IVnPayService _vnPayService;
+        private readonly PayOSService _payOSService;
 
-        public CheckOutModel(Exe2Context context, IVnPayService vnPayService)
+        public CheckOutModel(Exe2Context context, IVnPayService vnPayService, PayOSService payOSService )
         {
             _context = context;
             _vnPayService = vnPayService;
+            _payOSService = payOSService;
+            
         }
 
-        // Cart & payment
         public List<Food> ListOrderItems { get; set; } = new();
         public Dictionary<int, int> FoodQuantities { get; set; } = new();
         public List<PaymentMethod> PaymentMethods { get; set; } = new();
 
-        // User input
         [Required]
         [BindProperty]
         public string? FullName { get; set; } = "";
@@ -59,7 +62,7 @@ namespace NetQueStore.exe201.Pages
             ApplyCart(cart);
         }
 
-        public IActionResult OnPost()
+        public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
             {
@@ -97,6 +100,7 @@ namespace NetQueStore.exe201.Pages
                 var order = new NetQueStore.exe201.Models.Order
                 {
                     OrderNumber = GenerateOrderNumber(),
+                    BankId = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                     UserId = userId,
                     SessionId = sessionId,
                     GuestEmail = guestEmail,
@@ -143,19 +147,30 @@ namespace NetQueStore.exe201.Pages
 
                 if (selectedMethod.Code == "card")
                 {
-                    var paymentInfo = new PaymentInformationModel
+                    var returnUrl = $"{Request.Scheme}://{Request.Host}/Checkout/PaymentCallbackPayos";
+                    var cancelUrl = $"{Request.Scheme}://{Request.Host}/Cart";
+
+                    var payReq = new PayOSPaymentRequest
                     {
-                        OrderId = order.Id,
-                        Amount = (int)(order.TotalAmount),
-                        Name = order.RecipientName ?? "Khach",
-                        OrderDescription = $"Thanhtoan{order.Id}",
-                        OrderType = "other"
+                        Amount = (int)order.TotalAmount,
+                        Description = $"TT{order.OrderNumber}",
+                        OrderCode = order.BankId?.ToString() ?? "0",
+                        ReturnUrl = returnUrl,
+                        CancelUrl = cancelUrl
                     };
 
-                    TempData["SuccessMessage"] = "Đặt hàng thành công!";
-                    var paymentUrl = _vnPayService.CreatePaymentUrl(paymentInfo, HttpContext);
-                    return Redirect(paymentUrl);
+                    var paymentResult = await _payOSService.CreatePaymentAsync(payReq);
+
+                    if (paymentResult == null || string.IsNullOrEmpty(paymentResult.checkoutUrl))
+                    {
+                        var errorMessage = $"Không thể tạo link thanh toán cho đơn hàng {order.OrderNumber} - Amount: {payReq.Amount}, OrderCode: {payReq.OrderCode}";
+                        TempData["ErrorMessage"] = errorMessage;
+                        return RedirectToPage("/Error", new { message = errorMessage });
+                    }
+
+                    return Redirect(paymentResult.checkoutUrl);
                 }
+
 
                 TempData["SuccessMessage"] = "Đặt hàng thành công!";
                 return RedirectToPage("/OrderComplete", new { id = order.Id });
@@ -203,7 +218,7 @@ namespace NetQueStore.exe201.Pages
                 .Select(sf => sf.Fee)
                 .FirstOrDefault();
 
-            if (cart.ShippingFee == 0) cart.ShippingFee = 30000;
+            if (cart.ShippingFee == 0) cart.ShippingFee = 10000;
 
             cart.Total = cart.Subtotal + cart.ShippingFee;
 
