@@ -81,7 +81,9 @@ namespace NetQueStore.exe201.Pages.Admin
                         {
                             FoodId = product.Id,
                             Filename = fileName,
-                            CreatedAt = DateTime.UtcNow
+                            CreatedAt = DateTime.UtcNow,
+                            IsPrimary = true,
+                            DisplayOrder = 1
                         };
 
                         _context.FoodImages.Add(foodImage);
@@ -230,7 +232,9 @@ namespace NetQueStore.exe201.Pages.Admin
                             {
                                 FoodId = product.Id,
                                 Filename = fileName,
-                                CreatedAt = DateTime.UtcNow
+                                CreatedAt = DateTime.UtcNow,
+                                IsPrimary = true,
+                                DisplayOrder = 1
                             };
 
                             _context.FoodImages.Add(foodImage);

@@ -1,5 +1,6 @@
 ﻿@page "/specialties"
 @model NetQueStore.exe201.Pages.SpecialtiesModel
+@attribute [BindProperties(SupportsGet = true)]
 @{
     ViewData["Title"] = "Đặc Sản";
 }
@@ -68,8 +69,10 @@
                     <ul class="pagination">
                         @for (int i = 1; i <= (int)Math.Ceiling((double)Model.TotalItems / Model.PageSize); i++)
                         {
+                            var categoryParam = Model.CategoryId.HasValue ? $"&categoryId={Model.CategoryId}" : "";
                             <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
-                                <a class="page-link" href="?page=@i&minPrice=@Model.MinPrice&maxPrice=@Model.MaxPrice&sortOrder=@Model.SortOrder">@i</a>
+                                <a class="page-link"
+                                   href="?page=@i&minPrice=@Model.MinPrice&maxPrice=@Model.MaxPrice&sortOrder=@Model.SortOrder@categoryParam">@i</a>
                             </li>
                         }
                     </ul>
@@ -100,8 +103,6 @@
 
     </div>
 </div>
-
-
 
 
 @section Scripts {

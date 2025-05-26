@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using NetQueStore.exe201.Models; 
+using NetQueStore.exe201.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,24 +18,37 @@ namespace NetQueStore.exe201.Pages
             _context = context;
         }
 
+        [BindProperty(SupportsGet = true)]
+        [FromQuery(Name = "page")]
+        public int CurrentPage { get; set; } = 1;
+
+
+        [BindProperty(SupportsGet = true)]
+        public decimal MinPrice { get; set; } = 0;
+
+        [BindProperty(SupportsGet = true)]
+        public decimal MaxPrice { get; set; } = 1000000;
+
+        [BindProperty(SupportsGet = true)]
+        public string SortOrder { get; set; } = "default";
+
+        [BindProperty(SupportsGet = true)]
+        public int? CategoryId { get; set; }
+        public List<Category> Categories { get; set; } = new();
         public List<Food>? Foods { get; set; }
         public int TotalItems { get; set; }
-        public int CurrentPage { get; set; } = 1;
         public int PageSize { get; set; } = 12;
-        public decimal MinPrice { get; set; } = 0;
-        public decimal MaxPrice { get; set; } = 1000000;
-        public string SortOrder { get; set; } = "default";
-       public List<Category> Categories { get; set; } = new();
-        public int? CategoryId { get; set; }
 
 
-        public async Task OnGetAsync(int? categoryId, int page = 1, decimal minPrice = 0, decimal maxPrice = 148500, string sortOrder = "default")
+        public async Task OnGetAsync()
         {
-            CategoryId = categoryId;
-            CurrentPage = page;
-            MinPrice = minPrice;
-            MaxPrice = maxPrice;
-            SortOrder = sortOrder;
+
+            if (MaxPrice == 0)
+            {
+                MaxPrice = await _context.Foods
+                    .Where(f => f.IsActive)
+                    .MaxAsync(f => f.Price);
+            }
 
             var query = _context.Foods
                 .Where(f => f.IsActive && f.Price >= MinPrice && f.Price <= MaxPrice);
@@ -77,6 +90,7 @@ namespace NetQueStore.exe201.Pages
                 })
                 .ToDictionaryAsync(c => c.Id, c => (c.Name, c.ProductCount));
         }
+
     }
 }
 
