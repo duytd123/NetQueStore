@@ -45,6 +45,7 @@
                                         <span class="discount">@((int)((1 - food.SalePrice.Value / food.Price) * 100))%</span>
                                     }
                                     <h5 class="card-title">@food.Name</h5>
+                                    <h6 class="card-title">@food.Unit</h6>
                                     <p class="card-text">
                                         @if (food.SalePrice.HasValue && food.SalePrice.Value > 0 && food.SalePrice.Value < food.Price)
                                         {
