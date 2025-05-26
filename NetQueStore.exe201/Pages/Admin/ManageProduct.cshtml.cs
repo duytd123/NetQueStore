@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using NetQueStore.exe201.Models;
@@ -84,7 +84,7 @@ namespace NetQueStore.exe201.Pages.Admin
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, "L?i khi l?u d? li?u: " + ex.Message);
+                ModelState.AddModelError(string.Empty, "Lỗi khi lưu dữ liệu: " + ex.Message);
                 Products = await _context.Foods.ToListAsync();
                 Categories = await _context.Categories.ToListAsync();
                 Regions = await _context.Regions.ToListAsync();
