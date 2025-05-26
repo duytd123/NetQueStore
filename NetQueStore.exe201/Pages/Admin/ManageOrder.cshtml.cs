@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using NetQueStore.exe201.Models;
@@ -28,11 +29,19 @@ namespace NetQueStore.exe201.Pages.Admin
         [TempData]
         public string StatusMessage { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
+            var isLoggedIn = HttpContext.Session.GetString("AdminLoggedIn");
+            if (string.IsNullOrEmpty(isLoggedIn))
+            {
+                return RedirectToPage("/Admin/Login");
+            }
+
             Orders = await _context.Orders
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
+
+            return Page();
         }
 
         public async Task<IActionResult> OnPostUpdateStatusAsync()

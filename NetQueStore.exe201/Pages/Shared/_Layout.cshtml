@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>@ViewData["Title"] - WebApplication1</title>
+    @RenderSection("Styles", required: false)
 
     <!-- Bootstrap & site styles -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
@@ -20,9 +21,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
-
     <!-- Additional styles -->
     <link rel="stylesheet" href="~/css/open-iconic-bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/animate.css" />
@@ -36,6 +34,8 @@
     <link rel="stylesheet" href="~/css/flaticon.css" />
     <link rel="stylesheet" href="~/css/icomoon.css" />
     <link rel="stylesheet" href="~/css/style.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+
 </head>
 
     
@@ -113,7 +113,6 @@
             let cookieValue = getCookieValue("shopping_cart");
             let foodIds = cookieValue ? cookieValue.split('-') : [];
 
-            // Đếm số lượng món này trong cookie
             let currentQty = foodIds.filter(id => id === foodID.toString()).length;
 
             try {
@@ -130,7 +129,6 @@
                     return;
                 }
 
-                // Thêm món vào cookie
                 if (cookieValue) cookieValue += "-";
                 let newCartValue = cookieValue + foodID;
 
@@ -139,7 +137,6 @@
                 let expires = d.toUTCString();
                 document.cookie = "shopping_cart=" + newCartValue + ";expires=" + expires + ";path=/";
 
-                // Cập nhật badge và UI
                 const badge = document.getElementById("FoodCountBadge");
                 const foodsArray = newCartValue.split("-");
                 badge.innerHTML = foodsArray.length;
@@ -180,11 +177,15 @@
                     <div class="col-lg-12 d-block">
                         <div class="row d-flex">
                             <div class="col-md pr-4 d-flex topper align-items-center">
-                                <div class="icon mr-2 d-flex justify-content-center align-items-center"><span class="icon-phone2"></span></div>
+                                <div class="icon mr-2 d-flex justify-content-center align-items-center">
+                                    <i class="fas fa-phone"></i>
+                                </div>
                                 <span class="text">0865033812</span>
                             </div>
                             <div class="col-md pr-4 d-flex topper align-items-center">
-                                <div class="icon mr-2 d-flex justify-content-center align-items-center"><span class="icon-paper-plane"></span></div>
+                                <div class="icon mr-2 d-flex justify-content-center align-items-center">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
                                 <span class="text">hieubuivan646@gmail.com</span>
                             </div>
                             <div class="col-md-5 pr-4 d-flex topper align-items-center text-lg-right">
@@ -209,14 +210,21 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Shop</a>
                             <div class="dropdown-menu" aria-labelledby="dropdown04">
-                                <a class="dropdown-item" asp-page="/Shop">Cửa Hàng</a>
-                                <a class="dropdown-item" asp-page="/Wishlist">Wishlist</a>
-                                <a class="dropdown-item" asp-page="/Product">Single Product</a>
+                                <a class="dropdown-item" asp-page="/specialties">Cửa Hàng</a>
                                 <a class="dropdown-item" asp-page="/Cart">Cart</a>
                                 <a class="dropdown-item" asp-page="/Checkout">Checkout</a>
                             </div>
                         </li>
-                        <li class="nav-item"><a asp-page="/About" class="nav-link">Liên Hệ</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="contactDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Liên Hệ
+                            </a>
+                            <div class="dropdown-menu p-3" aria-labelledby="contactDropdown">
+                                <p class="mb-1"><strong>SĐT:</strong> <a href="tel:0865033812">0865 033 812</a></p>
+                                <p class="mb-0"><strong>Email:</strong> <a href="mailto:hieubuivan646@gmail.com">hieubuivan646@gmail.com</a></p>
+                            </div>
+                        </li>
+
 
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle cta cta-colored" href="/Cart" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -271,10 +279,10 @@
                         <h2 class="ftco-heading-2">Nét Quê Store</h2>
                         <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia.</p>
                         <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
-                            <li class="ftco-animate"><a href="#"><span class="icon-twitter"></span></a></li>
-                            <li class="ftco-animate"><a href="#"><span class="icon-facebook"></span></a></li>
-                            <li class="ftco-animate"><a href="#"><span class="icon-instagram"></span></a></li>
+                            <li class="ftco-animate"><a href="https://www.facebook.com/duyz2.3/"><i class="fab fa-facebook-f"></i></a></li>
+                            <li class="ftco-animate"><a href="https://www.instagram.com/duyz2.3/"><i class="fab fa-instagram"></i></a></li>
                         </ul>
+
                     </div>
                 </div>
                 <div class="col-md">
@@ -306,9 +314,22 @@
                         <h2 class="ftco-heading-2">Nếu bạn có câu hỏi?</h2>
                         <div class="block-23 mb-3">
                             <ul>
-                                <li><span class="icon icon-map-marker"></span><span class="text">Thôn 3, Thạch Hoà, Thạch Thất, Hà Nội</span></li>
-                                <li><a href="#"><span class="icon icon-phone"></span><span class="text">0865033812</span></a></li>
-                                <li><a href="#"><span class="icon icon-envelope"></span><span class="text">hieubuivan646@gmail.com</span></a></li>
+                                <li>
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span class="text">Thôn 3, Thạch Hoà, Thạch Thất, Hà Nội</span>
+                                </li>
+                                <li>
+                                    <a href="tel:0865033812">
+                                        <i class="fas fa-phone"></i>
+                                        <span class="text">0865033812</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="mailto:hieubuivan646@gmail.com">
+                                        <i class="fas fa-envelope"></i>
+                                        <span class="text">hieubuivan646@gmail.com</span>
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -318,8 +339,12 @@
                 <div class="col-md-12 text-center">
 
                     <p>
-                        Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved
+                        Copyright &copy;<script>document.write(new Date().getFullYear());</script> Dự Án khởi nghiệp EXE.
                     </p>
+                    <p>
+                        Product by duy-hiếu-minh-việt-long
+                    </p>
+
                 </div>
             </div>
         </div>

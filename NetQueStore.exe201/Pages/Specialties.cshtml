@@ -1,0 +1,111 @@
+﻿@page "/specialties"
+@model NetQueStore.exe201.Pages.SpecialtiesModel
+@{
+    ViewData["Title"] = "Đặc Sản";
+}
+<link rel="stylesheet" href="~/css/product-listing.css" />
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-9">
+            <div class="product-list">
+                <div class="row">
+                    <div class="col-12">
+                        <p>Showing @(((Model.CurrentPage - 1) * Model.PageSize) + 1)-@Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalItems) of @Model.TotalItems results</p>
+                        <div class="sort-options">
+                            <label class="me-2 fw-bold">Sắp xếp:</label>
+                            <select onchange="location.href='?sortOrder=' + this.value + '&page=1&minPrice=@Model.MinPrice&maxPrice=@Model.MaxPrice'">
+                                <option value="default" selected="@(Model.SortOrder == "default")">Mặc định</option>
+                                <option value="price_asc" selected="@(Model.SortOrder == "price_asc")">Giá tăng dần</option>
+                                <option value="price_desc" selected="@(Model.SortOrder == "price_desc")">Giá giảm dần</option>
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="row">
+                    @foreach (var food in Model.Foods)
+                    {
+                        <div class="col-md-4 mb-4">
+                            <div class="card">
+                                @{
+                                    var primaryImage = food.FoodImages?.FirstOrDefault(img => img.IsPrimary)
+                                    ?? food.FoodImages?.FirstOrDefault();
+                                    var imagePath = primaryImage != null
+                                    ? Url.Content("~/images/foods/" + primaryImage.Filename)
+                                    : Url.Content("~/images/default.jpg");
+                                }
+                                <div class="product-image-wrapper">
+                                    <img src="@imagePath" alt="@food.Name">
+                                </div>
+                                <div class="card-body">
+                                    @if (food.SalePrice.HasValue && food.SalePrice.Value > 0 && food.SalePrice.Value < food.Price)
+                                    {
+                                        <span class="discount">@((int)((1 - food.SalePrice.Value / food.Price) * 100))%</span>
+                                    }
+                                    <h5 class="card-title">@food.Name</h5>
+                                    <p class="card-text">
+                                        @if (food.SalePrice.HasValue && food.SalePrice.Value > 0 && food.SalePrice.Value < food.Price)
+                                        {
+                                            <span class="original-price">@(food.Price.ToString("N0") + "đ")</span>
+                                            <span class="sale-price">@(food.SalePrice.Value.ToString("N0") + "đ")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="price">@(food.Price.ToString("N0") + "đ")</span>
+                                        }
+                                    </p>
+                                    <button type="button" class="btn btn-warning btn-sm my-2" onclick="addToCart(this, @food.Id)">
+                                        Add to Cart <i class="bi bi-cart4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    }
+                </div>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        @for (int i = 1; i <= (int)Math.Ceiling((double)Model.TotalItems / Model.PageSize); i++)
+                        {
+                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                <a class="page-link" href="?page=@i&minPrice=@Model.MinPrice&maxPrice=@Model.MaxPrice&sortOrder=@Model.SortOrder">@i</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        <div class="col-md-3 filter-section">
+            <h4>LỌC GIÁ</h4>
+            <input type="range" min="0" max="148500" value="@Model.MinPrice"
+                   oninput="this.nextElementSibling.value = this.value + 'đ - 148.500đ'"
+                   onchange="location.href='?minPrice=' + this.value + '&maxPrice=148500&page=1&sortOrder=@Model.SortOrder'">
+            <output>@(Model.MinPrice.ToString("N0") + "đ - 1000.000đ")</output>
+
+            <h4>NHÓM SẢN PHẨM</h4>
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <a asp-page="./Specialties" asp-route-categoryId="">TẤT CẢ</a>
+                    <span class="badge bg-primary rounded-pill">@Model.TotalItems</span>
+                </li>
+                @foreach (var kv in Model.CategoriesWithCount)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <a asp-page="./Specialties" asp-route-categoryId="@kv.Key">@kv.Value.Name</a>
+                    </li>
+                }
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+}
+

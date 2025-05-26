@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using NetQueStore.exe201.Models;
@@ -25,8 +26,14 @@ namespace NetQueStore.exe201.Pages.Admin
         public List<Province> Provinces { get; set; }
 
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
+            var isLoggedIn = HttpContext.Session.GetString("AdminLoggedIn");
+            if (string.IsNullOrEmpty(isLoggedIn))
+            {
+                return RedirectToPage("/Admin/Login");
+            }
+
             Products = await _context.Foods
                 .Include(f => f.Category)
                 .Include(f => f.Region)
@@ -39,6 +46,8 @@ namespace NetQueStore.exe201.Pages.Admin
             Categories = await _context.Categories.ToListAsync();
             Regions = await _context.Regions.ToListAsync();
             Provinces = await _context.Provinces.ToListAsync();
+
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAddProductAsync(Food product, List<IFormFile> Images)

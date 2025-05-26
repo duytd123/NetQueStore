@@ -12,69 +12,87 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddRazorPages();
+        builder.Services.AddRazorPages();
 
-            builder.Services.AddDbContext<Exe2Context>(options =>
-               options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-           );
-            builder.Services.AddHttpContextAccessor();
+        builder.Services.AddDbContext<Exe2Context>(options =>
+           options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+       );
+        builder.Services.AddHttpContextAccessor();
 
-            builder.Services.AddSession(options =>
+        builder.Services.AddSession(options =>
+        {
+            options.IdleTimeout = TimeSpan.FromMinutes(30);
+            options.Cookie.HttpOnly = true;
+            options.Cookie.IsEssential = true;
+        });
+
+        builder.Logging.ClearProviders();
+        builder.Logging.AddConsole();
+        builder.Logging.SetMinimumLevel(LogLevel.Debug);
+
+
+        builder.Services.AddScoped<IVnPayService, VnPayService>();
+
+        IConfiguration configuration = new ConfigurationBuilder()
+        .AddJsonFile("appsettings.json")
+        .Build();
+
+        builder.Services.AddSingleton<PayOSService>(sp =>
+        {
+            var configuration = sp.GetRequiredService<IConfiguration>(); // lấy config từ DI container
+            var logger = sp.GetRequiredService<ILogger<PayOSService>>();
+
+            var payos = new PayOS(
+                configuration["PayOS:PAYOS_CLIENT_ID"] ?? throw new Exception("Missing PAYOS_CLIENT_ID"),
+                configuration["PayOS:PAYOS_API_KEY"] ?? throw new Exception("Missing PAYOS_API_KEY"),
+                configuration["PayOS:PAYOS_CHECKSUM_KEY"] ?? throw new Exception("Missing PAYOS_CHECKSUM_KEY")
+            );
+
+            return new PayOSService(payos, configuration, logger);
+        });
+
+
+        var app = builder.Build();
+
+        // Configure the HTTP request pipeline.
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();  
+        }
+        else
+        {
+            app.UseExceptionHandler("/Home/Error");
+            app.UseHsts();
+        }
+
+        //app.UseHttpsRedirection();
+        app.UseStaticFiles();
+
+        app.UseRouting();
+
+        app.UseStatusCodePages();
+
+        app.UseSession();
+
+        app.Use(async (context, next) =>
+        {
+            var path = context.Request.Path;
+
+            if (path.StartsWithSegments("/Admin") && !path.StartsWithSegments("/Admin/Login"))
             {
-                options.IdleTimeout = TimeSpan.FromMinutes(30);
-                options.Cookie.HttpOnly = true;
-                options.Cookie.IsEssential = true;
-            });
-
-            builder.Logging.ClearProviders();
-            builder.Logging.AddConsole();
-            builder.Logging.SetMinimumLevel(LogLevel.Debug);
-
-
-            builder.Services.AddScoped<IVnPayService, VnPayService>();
-
-            IConfiguration configuration = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json")
-            .Build();
-
-            builder.Services.AddSingleton<PayOSService>(sp =>
-            {
-                var configuration = sp.GetRequiredService<IConfiguration>(); // lấy config từ DI container
-                var logger = sp.GetRequiredService<ILogger<PayOSService>>();
-
-                var payos = new PayOS(
-                    configuration["PayOS:PAYOS_CLIENT_ID"] ?? throw new Exception("Missing PAYOS_CLIENT_ID"),
-                    configuration["PayOS:PAYOS_API_KEY"] ?? throw new Exception("Missing PAYOS_API_KEY"),
-                    configuration["PayOS:PAYOS_CHECKSUM_KEY"] ?? throw new Exception("Missing PAYOS_CHECKSUM_KEY")
-                );
-
-                return new PayOSService(payos, configuration, logger);
-            });
-
-
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();  // HIỂN THỊ CHI TIẾT LỖI TRONG DEV
+                var isLoggedIn = context.Session.GetString("AdminLoggedIn");
+                if (string.IsNullOrEmpty(isLoggedIn))
+                {
+                    context.Response.Redirect("/Admin/Login");
+                    return;
+                }
             }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-                app.UseHsts();
-            }
 
-            //app.UseHttpsRedirection();
-            app.UseStaticFiles();
+            await next();
+        });
 
-            app.UseRouting();
 
-            app.UseStatusCodePages();
-
-            app.UseSession();
-
-            app.UseAuthorization();
+        app.UseAuthorization();
 
         app.MapRazorPages();
 

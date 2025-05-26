@@ -22,7 +22,7 @@
                     <th>Date</th>
                     <th>Total</th>
                     <th>Payment</th>
-                    <th>Status</th>
+                    <th>OrderStatus</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -49,18 +49,27 @@
                             }
                             else
                             {
-                                <form method="post" class="d-flex gap-2 align-items-center">
+                                <form method="post" asp-page-handler="UpdateStatus" class="d-flex gap-2 align-items-center">
                                     <input type="hidden" name="SelectedOrderId" value="@order.Id" />
                                     <select name="SelectedOrderStatus" class="form-select form-select-sm w-auto">
-    @foreach (var status in statusList)
-    {
-        var isSelected = order.OrderStatus == status ? "selected" : "";
-        @:<option value="@status" @isSelected>@status</option>
-    }
-</select>
+                                        @foreach (var status in statusList)
+                                        {
+                                            if (order.OrderStatus == status)
+                                            {
+                                                <option value="@status" selected>@status</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@status">@status</option>
+                                            }
+                                        }
 
+                                        }
+
+                                    </select>
                                     <button type="submit" class="btn btn-sm btn-primary">Update</button>
                                 </form>
+
                             }
                         </td>
                         <td>
