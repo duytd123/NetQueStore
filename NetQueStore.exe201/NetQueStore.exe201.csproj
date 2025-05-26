@@ -31,7 +31,6 @@
   <ItemGroup>
     <Folder Include="wwwroot\css\bootstrap\" />
     <Folder Include="wwwroot\css\css\" />
-    <Folder Include="wwwroot\images\" />
     <Folder Include="wwwroot\scss\" />
 	  <Folder Include="Pages\Order\" />
 	  <Folder Include="wwwroot\uploads\" />
