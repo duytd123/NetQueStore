@@ -7,7 +7,7 @@ public partial class Food
 {
     public int Id { get; set; }
 
-    public string Name { get; set; } = null!;
+    public string Name { get; set; }    = null!;
 
     public string Slug { get; set; } = null!;
 
@@ -21,7 +21,7 @@ public partial class Food
 
     public decimal Price { get; set; }
 
-    public decimal? SalePrice { get; set; }
+    public decimal? SalePrice { get; set; } = null!;
 
     public int StockQuantity { get; set; }
 
@@ -70,6 +70,8 @@ public partial class Food
     public virtual ICollection<GiftSetItem> GiftSetItems { get; set; } = new List<GiftSetItem>();
 
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+
+    public virtual ICollection<OutOfStockNotification> OutOfStockNotifications { get; set; } = new List<OutOfStockNotification>();
 
     public virtual Province Province { get; set; } = null!;
 

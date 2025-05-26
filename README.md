@@ -2,20 +2,19 @@
 Welcome to Net Que Store, a web-based e-commerce platform developed using ASP.NET MVC (C#). This project aims to bridge the culinary gap for students living far from home by connecting them with authentic regional specialties through a convenient, personalized, and trustworthy platform.
 
 💡 Project Idea
-Why This Idea?
 Many students move to big cities for education, leaving behind the comforting taste of their hometown. While regional specialties exist in the market, students face problems such as:
 
-Limited access to authentic, quality local dishes.
+-Limited access to authentic, quality local dishes.
 
-Lack of trust in unofficial buying channels.
+-Lack of trust in unofficial buying channels.
 
-No personalization for unique culinary preferences.
+-No personalization for unique culinary preferences.
 
-Our solution provides:
+-Our solution provides:
 
-A dedicated platform for regional specialties.
+-A dedicated platform for regional specialties.
 
-Safe, fast, and affordable access to trusted local food products.
+-Safe, fast, and affordable access to trusted local food products.
 
 📊 Market Analysis
 Students studying away from home, especially in urban centers like Hanoi, Ho Chi Minh City, Da Nang.
@@ -30,7 +29,6 @@ Limited use of AI-powered personalization in existing e-commerce food platforms.
 🥊 Competitor Overview
 Competitor	Weakness
 
-🧭 Mission & Core Values
 🎯 Mission
 "Connecting students far from home with familiar hometown flavors, thereby creating a connection and preserving regional culinary culture."
 
@@ -54,11 +52,3 @@ AI Integration: Chatbot logic (customizable for preferences)
 
 Authentication: ASP.NET Identity
 
-
-👨‍💻 Team
-Developed by a passionate student group that understands the deep connection between food, memory, and identity. We combined technology and cultural empathy to create a meaningful solution for fellow students.
-
-📦 Getting Started (for Developers)
-
-🙌 Contribution
-Contributions are welcome! Feel free to fork and submit pull requests if you’re passionate about food, culture, and code.

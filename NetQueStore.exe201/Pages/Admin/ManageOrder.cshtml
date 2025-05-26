@@ -1,0 +1,90 @@
+﻿@page
+@model NetQueStore.exe201.Pages.Admin.ManageOrderModel
+@{
+    Layout = "_AdminLayout";
+    var statusList = new[] {
+        "created", "confirmed", "processing", "ready_to_ship",
+        "shipping", "delivered", "completed", "canceled", "returned"
+    };
+}
+
+<div>
+    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Orders Management</h1>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Order #</th>
+                    <th>Customer</th>
+                    <th>Date</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th>OrderStatus</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model.Orders)
+                {
+                    <tr>
+                        <td>@order.OrderNumber</td>
+                        <td>
+                            @order.RecipientName <br />
+                            <small>@order.RecipientEmail</small>
+                        </td>
+                        <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                        <td>@order.TotalAmount.ToString("N0") ₫</td>
+                        <td>
+                            <span class="badge bg-@(order.PaymentStatus == "paid" ? "success" : "secondary")">
+                                @order.PaymentStatus?.ToUpper()
+                            </span>
+                        </td>
+                        <td>
+                            @if (order.PaymentStatus?.ToLower() == "paid")
+                            {
+                                <span>@order.OrderStatus</span>
+                            }
+                            else
+                            {
+                                <form method="post" asp-page-handler="UpdateStatus" class="d-flex gap-2 align-items-center">
+                                    <input type="hidden" name="SelectedOrderId" value="@order.Id" />
+                                    <select name="SelectedOrderStatus" class="form-select form-select-sm w-auto">
+                                        @foreach (var status in statusList)
+                                        {
+                                            if (order.OrderStatus == status)
+                                            {
+                                                <option value="@status" selected>@status</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@status">@status</option>
+                                            }
+                                        }
+
+                                        }
+
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                                </form>
+
+                            }
+                        </td>
+                        <td>
+                            @if (order.PaymentStatus?.ToLower() == "paid")
+                            {
+                                <span class="text-muted">Locked</span>
+                            }
+                            else
+                            {
+                                <span class="text-success">Editable</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -20,3 +20,18 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.footer-custom {
+    background-color: #216b00;
+}
+
+    .footer-custom a:hover {
+        text-decoration: underline;
+    }
+
+.date-box {
+    width: 45px;
+    min-width: 45px;
+    font-size: 0.8rem;
+    line-height: 1rem;
+}
