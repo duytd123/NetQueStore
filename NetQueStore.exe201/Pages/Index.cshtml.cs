@@ -11,6 +11,8 @@ public class IndexModel : PageModel
 
     public List<Food> Foods { get; set; } = new();
 
+    public List<Category> Categories { get; set; } = new();
+
     public IndexModel(Exe2Context context)
     {
         _context = context;
@@ -18,12 +20,25 @@ public class IndexModel : PageModel
                
     public void OnGet()
     {
-        Foods = _context.Foods
-            .Include(f => f.FoodImages)
-            .Include(f => f.Category)
-            .Include(f => f.Region)
-            .Include(f => f.Province)
-            .Where(f => f.IsActive)
+        Categories = _context.Categories
+            .Take(4)
             .ToList();
+
+        Foods = _context.Foods
+        .Include(f => f.FoodImages)
+        .Include(f => f.Category)
+        .Include(f => f.Region)
+        .Include(f => f.Province)
+        .Where(f => f.IsActive)
+        .OrderByDescending(f => f.StockQuantity)
+        .Take(8)
+        .ToList();
+        //Foods = _context.Foods
+        //    .Include(f => f.FoodImages)
+        //    .Include(f => f.Category)
+        //    .Include(f => f.Region)
+        //    .Include(f => f.Province)
+        //    .Where(f => f.IsActive)
+        //    .ToList();
     }
 }
