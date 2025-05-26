@@ -109,29 +109,54 @@
 <body class="goto-here">
 
     <script>
-        function addToCart(button, foodID) {
-            let oldCartValue = getCookieValue("shopping_cart");
-            if (oldCartValue) oldCartValue += "-";
-            let newCartValue = oldCartValue + foodID;
+                        async function addToCart(button, foodID) {
+            let cookieValue = getCookieValue("shopping_cart");
+            let foodIds = cookieValue ? cookieValue.split('-') : [];
 
-            let d = new Date();
-            d.setDate(d.getDate() + 365);
-            let expires = d.toUTCString();
-            document.cookie = "shopping_cart=" + newCartValue + ";expires=" + expires + ";path=/";
+            // Đếm số lượng món này trong cookie
+            let currentQty = foodIds.filter(id => id === foodID.toString()).length;
 
-            const badge = document.getElementById("FoodCountBadge");
-            const foodsArray = newCartValue.split("-");
-            badge.innerHTML = foodsArray.length;
-            button.innerHTML = "Added <i class='bi bi-check-lg'></i>";
-            setTimeout(() => {
-            button.innerHTML = "Add to Cart <i class='bi bi-cart4'></i>";
-        }, 3000);
+            try {
+                let response = await fetch(`/Cart/GetStock?foodId=${foodID}`);
+                let data = await response.json();
 
-            fetch('/Cart/Partial')
-                .then(res => res.text())
-                .then(html => {
-                    document.getElementById("CartDropdownContent").innerHTML = html;
-                });
+                if (!data.success) {
+                    alert(data.message || "Sản phẩm không tồn tại");
+                    return;
+                }
+
+                if (currentQty + 1 > data.stockQuantity) {
+                    alert(`Sản phẩm này chỉ còn ${data.stockQuantity} trong kho.`);
+                    return;
+                }
+
+                // Thêm món vào cookie
+                if (cookieValue) cookieValue += "-";
+                let newCartValue = cookieValue + foodID;
+
+                let d = new Date();
+                d.setDate(d.getDate() + 365);
+                let expires = d.toUTCString();
+                document.cookie = "shopping_cart=" + newCartValue + ";expires=" + expires + ";path=/";
+
+                // Cập nhật badge và UI
+                const badge = document.getElementById("FoodCountBadge");
+                const foodsArray = newCartValue.split("-");
+                badge.innerHTML = foodsArray.length;
+
+                button.innerHTML = "Added <i class='bi bi-check-lg'></i>";
+                setTimeout(() => {
+                    button.innerHTML = "Add to Cart <i class='bi bi-cart4'></i>";
+                }, 3000);
+
+                fetch('/Cart/Partial')
+                    .then(res => res.text())
+                    .then(html => {
+                        document.getElementById("CartDropdownContent").innerHTML = html;
+                    });
+            } catch (error) {
+                alert("Lỗi khi thêm sản phẩm vào giỏ hàng.");
+            }
         }
 
         function getCookieValue(cookieName) {
