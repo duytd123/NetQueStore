@@ -80,6 +80,25 @@ namespace NetQueStore.exe201.Pages
                 return Page();
             }
 
+            foreach (var kv in cartData.FoodQuantities)
+            {
+                var foodId = kv.Key;
+                var requestedQty = kv.Value;
+
+                var food = _context.Foods.FirstOrDefault(f => f.Id == foodId && f.IsActive);
+                if (food == null)
+                {
+                    ModelState.AddModelError("", $"Sản phẩm với ID {foodId} không tồn tại.");
+                    return Page();
+                }
+
+                if (requestedQty > food.StockQuantity)
+                {
+                    ModelState.AddModelError("", $"Sản phẩm \"{food.Name}\" chỉ còn lại {food.StockQuantity} trong kho.");
+                    return Page();
+                }
+            }
+
             var selectedMethod = _context.PaymentMethods
                 .FirstOrDefault(p => p.Id == PaymentMethodId && p.IsActive);
 
@@ -207,18 +226,35 @@ namespace NetQueStore.exe201.Pages
 
             cart.Subtotal = cart.ListOrderItems.Sum(f => f.Price * cart.FoodQuantities[f.Id]);
 
+            // Lấy provinceId từ session, mặc định = 1 nếu không có
             int provinceId = 1;
             var provinceIdStr = HttpContext.Session.GetString("province_id");
             if (!string.IsNullOrEmpty(provinceIdStr) && int.TryParse(provinceIdStr, out int pId))
                 provinceId = pId;
 
-            cart.ShippingFee = _context.ShippingFees
+            // Lấy thông tin phí ship từ bảng shipping_fees
+            var shippingData = _context.ShippingFees
                 .Where(sf => sf.ProvinceId == provinceId)
                 .OrderByDescending(sf => sf.CreatedAt)
-                .Select(sf => sf.Fee)
                 .FirstOrDefault();
 
-            if (cart.ShippingFee == 0) cart.ShippingFee = 10000;
+            if (shippingData != null)
+            {
+                // Nếu có min_order_value và đạt ngưỡng thì miễn phí ship
+                if (shippingData.MinOrderValue.HasValue && cart.Subtotal >= shippingData.MinOrderValue.Value)
+                {
+                    cart.ShippingFee = 0;
+                }
+                else
+                {
+                    cart.ShippingFee = shippingData.Fee;
+                }
+            }
+            else
+            {
+                // Nếu không có dữ liệu, dùng phí ship mặc định
+                cart.ShippingFee = 10000;
+            }
 
             cart.Total = cart.Subtotal + cart.ShippingFee;
 
