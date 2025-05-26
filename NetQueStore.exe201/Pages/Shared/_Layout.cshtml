@@ -180,7 +180,7 @@
 
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
-                        <li class="nav-item active"><a asp-page="/Index" class="nav-link">Trang Chủ</a></li>
+                        <li class="nav-item active"><a asp-page="/Index" class="nav-link">Trang Chủ</a></li>                       
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Shop</a>
                             <div class="dropdown-menu" aria-labelledby="dropdown04">
@@ -203,6 +203,11 @@
                             <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="cartDropdown" style="min-width: 320px;" id="CartDropdownContent">
                                 @await Html.PartialAsync("_CartDropdownPartial")
                             </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark me-3" href="/Order" title="Tra cứu đơn hàng">
+                                <i class="bi bi-search h4"></i>
+                            </a>
                         </li>
 
                     </ul>
