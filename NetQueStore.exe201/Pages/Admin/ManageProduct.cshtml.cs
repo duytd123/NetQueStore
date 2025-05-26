@@ -58,9 +58,10 @@ namespace NetQueStore.exe201.Pages.Admin
                     if (image.Length > 0)
                     {
                         var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
-                        var filePath = Path.Combine(_env.WebRootPath, "uploads", fileName);
+                        var folderPath = Path.Combine(_env.WebRootPath, "images", "foods");
+                        Directory.CreateDirectory(folderPath); 
 
-                        Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                        var filePath = Path.Combine(folderPath, fileName);
 
                         using (var stream = new FileStream(filePath, FileMode.Create))
                         {
@@ -70,7 +71,7 @@ namespace NetQueStore.exe201.Pages.Admin
                         var foodImage = new FoodImage()
                         {
                             FoodId = product.Id,
-                            Filename = "/uploads/" + fileName,
+                            Filename = fileName,
                             CreatedAt = DateTime.UtcNow
                         };
 
@@ -206,9 +207,10 @@ namespace NetQueStore.exe201.Pages.Admin
                         if (image.Length > 0)
                         {
                             var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
-                            var filePath = Path.Combine(_env.WebRootPath, "uploads", fileName);
+                            var folderPath = Path.Combine(_env.WebRootPath, "images", "foods");
+                            Directory.CreateDirectory(folderPath);
 
-                            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                            var filePath = Path.Combine(folderPath, fileName);
 
                             using (var stream = new FileStream(filePath, FileMode.Create))
                             {
@@ -218,7 +220,7 @@ namespace NetQueStore.exe201.Pages.Admin
                             var foodImage = new FoodImage()
                             {
                                 FoodId = product.Id,
-                                Filename = "/uploads/" + fileName,
+                                Filename = fileName,
                                 CreatedAt = DateTime.UtcNow
                             };
 
@@ -233,7 +235,7 @@ namespace NetQueStore.exe201.Pages.Admin
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(string.Empty, "L?i khi l?u d? li?u: " + ex.Message);
+                ModelState.AddModelError(string.Empty, "Lỗi khi lưu d? li?u: " + ex.Message);
                 Products = await _context.Foods.ToListAsync();
                 Categories = await _context.Categories.ToListAsync();
                 Regions = await _context.Regions.ToListAsync();

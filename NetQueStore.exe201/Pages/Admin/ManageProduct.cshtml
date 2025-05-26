@@ -64,7 +64,7 @@
                                     <td>
                                         @foreach (var img in product.FoodImages)
                                         {
-                                            <img src="@Url.Content("~" + img.Filename)" alt="Food Image" style="max-height: 80px; margin-right:5px;" />
+                                            <img src="/images/foods/@img.Filename" alt="Food Image" style="max-height: 80px;" />
                                         }
                                     </td>
                                     <td>@product.Name</td>
