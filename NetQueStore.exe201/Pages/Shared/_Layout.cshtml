@@ -1,16 +1,20 @@
-﻿﻿
-<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>@ViewData["Title"] - WebApplication1</title>
+    <title>NetQueStore</title>
+    <link rel="icon" type="image/jpeg" href="~/images/icon1.png" />
+
     @RenderSection("Styles", required: false)
 
     <!-- Bootstrap & site styles -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WebApplication1.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800&display=swap" rel="stylesheet">
@@ -36,9 +40,11 @@
     <link rel="stylesheet" href="~/css/style.css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
 
-</head>
 
     
+
+</head>
+
     @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
     @inject NetQueStore.exe201.Models.Exe2Context _context
     @using Microsoft.EntityFrameworkCore
@@ -206,13 +212,13 @@
 
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
-                        <li class="nav-item active"><a asp-page="/Index" class="nav-link">Trang Chủ</a></li>                       
+                        <li class="nav-item active"><a asp-page="/Index" class="nav-link">Trang Chủ</a></li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Shop</a>
                             <div class="dropdown-menu" aria-labelledby="dropdown04">
-                                <a class="dropdown-item" asp-page="/specialties">Cửa Hàng</a>
-                                <a class="dropdown-item" asp-page="/Cart">Cart</a>
-                                <a class="dropdown-item" asp-page="/Checkout">Checkout</a>
+                                <a class="dropdown-item" asp-page="/specialties">Cửa hàng</a>
+                                <a class="dropdown-item" asp-page="/Cart">Giỏ hàng</a>
+                                <a class="dropdown-item" asp-page="/Checkout">Thanh toán</a>
                             </div>
                         </li>
                         <li class="nav-item dropdown">
@@ -224,6 +230,10 @@
                                 <p class="mb-0"><strong>Email:</strong> <a href="mailto:hieubuivan646@gmail.com">hieubuivan646@gmail.com</a></p>
                             </div>
                         </li>
+
+                        <li class="nav-item active"><a asp-page="/Aboutme" class="nav-link">Hỗ trợ</a></li>
+
+                        <li class="nav-item active"><a asp-page="/Ai" class="nav-link">Chat With Me</a></li>
 
 
                         <li class="nav-item dropdown">
@@ -249,7 +259,6 @@
         </nav>
     </header>
     <!-- BODY -->
-    
     @if (ViewData["NoContainer"] == null)
     {
         <div class="container mt-3">
@@ -269,7 +278,7 @@
             <div class="row">
                 <div class="mouse">
                     <a href="#" class="mouse-icon">
-                        <div class="mouse-wheel"><span class="ion-ios-arrow-up"></span></div>
+                        <div class="mouse-wheel"><i class="fas fa-arrow-up"></i></div>
                     </a>
                 </div>
             </div>
@@ -277,10 +286,9 @@
                 <div class="col-md">
                     <div class="ftco-footer-widget mb-4">
                         <h2 class="ftco-heading-2">Nét Quê Store</h2>
-                        <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia.</p>
                         <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
-                            <li class="ftco-animate"><a href="https://www.facebook.com/duyz2.3/"><i class="fab fa-facebook-f"></i></a></li>
-                            <li class="ftco-animate"><a href="https://www.instagram.com/duyz2.3/"><i class="fab fa-instagram"></i></a></li>
+                            <li class="ftco-animate"><a href="https://www.facebook.com/profile.php?id=61576889700715"><i class="fab fa-facebook-f"></i></a></li>
+                            <li class="ftco-animate"><a href="https://www.facebook.com/profile.php?id=61576889700715"><i class="fab fa-instagram"></i></a></li>
                         </ul>
 
                     </div>
@@ -289,8 +297,8 @@
                     <div class="ftco-footer-widget mb-4 ml-md-5">
                         <h2 class="ftco-heading-2">Menu</h2>
                         <ul class="list-unstyled">
-                            <li><a href="#" class="py-2 d-block">Cửa Hàng</a></li>
-                            <li><a href="#" class="py-2 d-block">Liên Hệ Với Chúng Tôi</a></li>
+                            <li><a href="/specialties" class="py-2 d-block">Cửa Hàng</a></li>
+                            <li><a href="/Aboutme" class="py-2 d-block">Liên Hệ Với Chúng Tôi</a></li>
                         </ul>
                     </div>
                 </div>
@@ -298,13 +306,9 @@
                     <div class="ftco-footer-widget mb-4">
                         <h2 class="ftco-heading-2">Help</h2>
                         <div class="d-flex">
-                            <ul class="list-unstyled mr-l-5 pr-l-3 mr-4">
-                                <li><a href="#" class="py-2 d-block">Thông Tin Gửi Hàng</a></li>
-                                <li><a href="#" class="py-2 d-block">Chính Sách Bảo Mật</a></li>
-                            </ul>
                             <ul class="list-unstyled">
-                                <li><a href="#" class="py-2 d-block">FAQs</a></li>
-                                <li><a href="#" class="py-2 d-block">Liên Hệ</a></li>
+                                <li><a href="/Ai" class="py-2 d-block">FAQs</a></li>
+                                <li><a href="/Aboutme" class="py-2 d-block">Liên Hệ</a></li>
                             </ul>
                         </div>
                     </div>
@@ -351,8 +355,11 @@
     </footer>
 
 
-  
+
     <div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee" /><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00" /></svg></div>
+    
+  
+    
     <script src="~/js/jquery.min.js"></script>
     <script src="~/js/jquery-migrate-3.0.1.min.js"></script>
     <script src="~/js/popper.min.js"></script>
@@ -369,6 +376,7 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
     <script src="~/js/google-map.js"></script>
     <script src="~/js/main.js"></script>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -383,6 +391,5 @@
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 
-    </body>
+</body>
 </html>
-   

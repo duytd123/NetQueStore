@@ -87,7 +87,23 @@
 					<div class="col-sm-12 ftco-animate text-center">
 						<h1 class="mb-2">100% Đảm bảo vệ sinh an toàn thực phẩm</h1>
 						<h2 class="subheading mb-4">an toàn với người dùng </h2>
-						<p><a href="#" class="btn btn-primary">Xem sản phẩm</a></p>
+						<p><a href="/specialties" class="btn btn-primary">Xem sản phẩm</a></p>
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+
+		<div class="slider-item" style="background-image: url(images/bg_33.jpg);">
+			<div class="overlay"></div>
+			<div class="container">
+				<div class="row slider-text justify-content-center align-items-center" data-scrollax-parent="true">
+
+					<div class="col-sm-12 ftco-animate text-center">
+						<h1 class="mb-2"></h1>
+						<h2 class="subheading mb-4"></h2>
+						<p><a href="/specialties" class="btn btn-primary">Xem sản phẩm</a></p>
 					</div>
 
 				</div>
@@ -163,26 +179,17 @@
 						</div>
 					</div>
 					<div class="col-md-6">
-						<div class="category-wrap ftco-animate img mb-4 d-flex align-items-end" style="background-image: url(images/foods/category-1.jpg);">
-							<div class="text px-3 py-1">
-								<h2 class="mb-0"><a href="">Bánh</a></h2>
-							</div>
-						</div>
+
 						<div class="category-wrap ftco-animate img d-flex align-items-end" style="background-image: url(images/foods/category-2.jpg);">
 							<div class="text px-3 py-1">
-								<h2 class="mb-0"><a href="">Đồ Ăn Vặt</a></h2>
+								<h2 class="mb-0"><a href="">Đồ Khô</a></h2>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 
-			<div class="col-md-4">
-				<div class="category-wrap ftco-animate img mb-4 d-flex align-items-end" style="background-image: url(images/foods/category-3.jpg);">
-					<div class="text px-3 py-1">
-						<h2 class="mb-0"><a href="">Món Nước</a></h2>
-					</div>
-				</div>
+			<div class="col-md-4">			
 				<div class="category-wrap ftco-animate img d-flex align-items-end" style="background-image: url(images/foods/category-4.jpg);">
 					<div class="text px-3 py-1">
 						<h2 class="mb-0"><a href="">Gia Vị</a></h2>
@@ -194,64 +201,93 @@
 	</div>
 </section>
 
+
+
 <section class="ftco-section">
-	<div class="container">
-		<div class="row justify-content-center mb-3 pb-3">
-			<div class="col-md-12 heading-section text-center ftco-animate">
-				<h2 class="mb-4">Các sản phẩm bán chạy</h2>
-				<p></p>
-			</div>
-		</div>
-	</div>
-	<div class="container">
-		<div class="row">
-
-			<div class="py-5">
-				<div class="container">
-					<div class="row">
-						@foreach (var item in Model.Foods.Take(4))
-
+    <div class="container">
+        <div class="row justify-content-center mb-3 pb-3">
+            <div class="col-md-12 heading-section text-center ftco-animate">
+                <h2 class="mb-4">Các sản phẩm bán chạy</h2>
+                <p>Khám phá những sản phẩm được ưa chuộng nhất của chúng tôi!</p>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            @foreach (var item in Model.Foods.Take(4))
+            {
+                var image = item.FoodImages.FirstOrDefault(i => i.IsPrimary)?.Filename ?? "default.png";
+                var isOutOfStock = item.StockQuantity <= 0;
+				<div class="col-lg-3 col-sm-6 my-2">
+					<div class="card product-card shadow text-center h-100">
+						@if (item.SalePrice.HasValue && item.SalePrice < item.Price)
 						{
-							var image = item.FoodImages.FirstOrDefault(i => i.IsPrimary)?.Filename ?? ".png";
-							<div class="col-lg-3 col-sm-6 my-2">
-								<div class="card shadow text-center h-100 book-item">
-									<img src="/images/foods/@image" class="card-img-top p-3" alt="..." />
-									<div class="card-body">
-										<h4>@item.Name</h4>
-										<p>@item.Unit</p>
-										<h4>@item.Price.ToString("N0") ₫</h4>
-										<button type="button" class="btn btn-warning btn-sm my-2" onclick="addToCart(this, @item.Id)">
-											Add to Cart <i class="bi bi-cart4"></i>
-										</button>
-									</div>
-								</div>
-							</div>
+							<span class="sale-badge">Sale</span>
 						}
+						<a href="/Detail?id=@item.Id" class="product-image-wrapper">
+							<img src="/images/foods/@image" class="product-image" alt="@item.Name" />
+						</a>
+						<div class="card-body d-flex flex-column justify-content-between">
+							<div>
+								<h5 class="card-title">@item.Name</h5>
+								<p class="text-muted">@item.Unit</p>
+								@if (item.SalePrice.HasValue && item.SalePrice < item.Price)
+								{
+									<p class="text-decoration-line-through">@item.Price.ToString("N0") ₫</p>
+									<p class="price">@item.SalePrice.Value.ToString("N0") ₫</p>
+								}
+								else
+								{
+									<p class="price">@item.Price.ToString("N0") ₫</p>
+								}
+							</div>
+							<div class="mt-2">
+								<button type="button" class="btn btn-add-cart btn-sm @(!isOutOfStock ? "" : "disabled")"
+										onclick="addToCart(this, @item.Id)"
+								@(isOutOfStock ? "title='Out of Stock'" : "")>
+									Add to Cart <i class="bi bi-cart4"></i>
+								</button>
+								@if (isOutOfStock)
+								{
+									<small class="text-danger mt-1 d-block">Out of Stock</small>
+								}
+							</div>
+						</div>
 					</div>
 				</div>
-			</div>
 
-		</div>
-	</div>
+            }
+        </div>
+    </div>
 </section>
 
-<section class="ftco-section img" style="background-image: url(images/bg_3.jpg);">
+<section class="ftco-section img" style="background-image: url(images/bg_3.jpg); background-size: cover; background-position: center;">
 	<div class="container">
 		<div class="row justify-content-end">
-			<div class="col-md-6 heading-section ftco-animate deal-of-the-day ftco-animate">
+			<div class="col-md-6 heading-section ftco-animate deal-of-the-day">
 				<span class="subheading">Đem đến trải nghiệm tốt nhất cho bạn</span>
-				<h2 class="mb-4">Giá ưu đãi cho bạn</h2>
-				<p>Nét Quê Store mong muốn đem đến một nềnn tảng bán hàng trực tuyến tốt nhất</p>
-				<div id="timer" class="d-flex mt-5">
-					<div class="time" id="days"></div>
-					<div class="time pl-3" id="hours"></div>
-					<div class="time pl-3" id="minutes"></div>
-					<div class="time pl-3" id="seconds"></div>
+				<h2 class="mb-4">Giá ưu đãi cho bạn sẽ hết sau:</h2>
+				<p>Nét Quê Store mong muốn đem đến một nền tảng bán hàng trực tuyến tốt nhất</p>
+
+				<!-- TIMER START -->
+				<div id="promo-timer" class="d-flex mt-5">
+					<div class="promo-time-box" id="promo-days"></div>
+					<div class="promo-time-box ml-3" id="promo-hours"></div>
+					<div class="promo-time-box ml-3" id="promo-minutes"></div>
+					<div class="promo-time-box ml-3" id="promo-seconds"></div>
 				</div>
+				<!-- TIMER END -->
+
 			</div>
 		</div>
 	</div>
 </section>
+
+<script src="https://app.tudongchat.com/js/chatbox.js"></script>
+<script>
+	const tudong_chatbox = new TuDongChat('fKhNtVTDaw-3HqACEJYfv')
+	tudong_chatbox.initial()
+</script>
 
 <hr>
 
@@ -260,19 +296,166 @@
 	<div class="container py-4">
 		<div class="row d-flex justify-content-center py-5">
 			<div class="col-md-6">
-				<h2 style="font-size: 22px;" class="mb-0">Subcribe to our Newsletter</h2>
-				<span>Get e-mail updates about our latest shops and special offers</span>
+				<h2 style="font-size: 22px;" class="mb-0">Để lại email để nhận những thông báo mới nhất!</h2>
+				<span>Nhận email cập nhật về các cửa hàng mới nhất và các ưu đãi đặc biệt của chúng tôi</span>
 			</div>
 			<div class="col-md-6 d-flex align-items-center">
-				<form action="#" class="subscribe-form">
+				<form method="post" class="subscribe-form">
 					<div class="form-group d-flex">
-						<input type="text" class="form-control" placeholder="Enter email address">
-						<input type="submit" value="Subscribe" class="submit px-3">
+						<input asp-for="Email" class="form-control" placeholder="Nhập email của bạn để được hỗ trợ!" />
+						<input type="submit" value="Subscribe" class="submit px-3" />
 					</div>
+					<span class="text-danger" asp-validation-for="Email"></span>
+					@if (!string.IsNullOrEmpty(Model.Message))
+					{
+						<div class="mt-2 alert alert-info">@Model.Message</div>
+					}
 				</form>
+
 			</div>
 		</div>
 	</div>
 </section>
+
+
+<style>
+
+
+	.promo-time-box {
+		font-size: 2rem;
+		font-weight: bold;
+		color: white;
+		background-color: rgba(0, 0, 0, 0.2);
+		padding: 15px;
+		border-radius: 10px;
+		text-align: center;
+	}
+
+		.promo-time-box span {
+			display: block;
+			font-size: 0.8rem;
+			font-weight: normal;
+			margin-top: 5px;
+		}
+
+	.product-card {
+		transition: transform 0.3s ease, box-shadow 0.3s ease;
+		position: relative;
+		overflow: hidden;
+		height: 430px;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		background-color: #fff;
+	}
+
+		.product-card:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+		}
+
+	.product-image-wrapper {
+		width: 100%;
+		height: 260px; /* ảnh chiếm phần cố định */
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 10px;
+		border-bottom: 1px solid #eee;
+		background-color: #fafafa;
+	}
+
+	.product-image {
+		max-width: 100%;
+		max-height: 100%;
+		object-fit: contain;
+	}
+
+	.card-body {
+		padding: 10px;
+		flex-grow: 1;
+	}
+
+	.card-title {
+		font-size: 1.1rem;
+		margin-bottom: 0.2rem;
+		height: 2.4em;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.text-muted {
+		font-size: 0.9rem;
+	}
+
+	.price {
+		font-size: 1.2rem;
+		color: #28a745;
+		margin: 0.2rem 0;
+	}
+
+	.text-decoration-line-through {
+		font-size: 0.9rem;
+		color: #dc3545;
+	}
+
+	.btn-add-cart {
+		width: 100%;
+		font-size: 0.9rem;
+		padding: 6px;
+		background-color: #ffc107;
+		border: none;
+		border-radius: 4px;
+	}
+
+		.btn-add-cart:hover {
+			background-color: #ffca28;
+		}
+
+	.sale-badge {
+		position: absolute;
+		top: 10px;
+		left: 10px;
+		background-color: #dc3545;
+		color: white;
+		padding: 4px 8px;
+		border-radius: 4px;
+		font-size: 12px;
+		z-index: 2;
+	}
+
+
+</style>
+
+<script>
+  // Thay ngày giờ kết thúc đếm ngược ở đây, định dạng ISO 8601 (năm-tháng-ngàyThời gian)
+  const promoEndTime = new Date("2025-07-07T23:59:59");
+
+  function updatePromoTimer() {
+    const now = new Date();
+    let timeLeft = Math.floor((promoEndTime - now) / 1000);
+
+    if (timeLeft < 0) timeLeft = 0;
+
+    let days = Math.floor(timeLeft / 86400);
+    let hours = Math.floor((timeLeft % 86400) / 3600);
+    let minutes = Math.floor((timeLeft % 3600) / 60);
+    let seconds = Math.floor(timeLeft % 60);
+
+    document.getElementById("promo-days").innerHTML = days + "<span>Ngày</span>";
+    document.getElementById("promo-hours").innerHTML = (hours < 10 ? "0" : "") + hours + "<span>Giờ</span>";
+    document.getElementById("promo-minutes").innerHTML = (minutes < 10 ? "0" : "") + minutes + "<span>Phút</span>";
+    document.getElementById("promo-seconds").innerHTML = (seconds < 10 ? "0" : "") + seconds + "<span>Giây</span>";
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    updatePromoTimer();
+    setInterval(updatePromoTimer, 1000);
+  });
+</script>
+
+
+
 
 

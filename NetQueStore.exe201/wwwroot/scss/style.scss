@@ -1596,38 +1596,45 @@ textarea.form-control {
   }
 }
 
-.heading-section{
+.heading-section {
 	position: relative;
-	.subheading{
+
+	.subheading {
 		font-size: 18px;
 		display: block;
 		margin-bottom: 10px;
 		font-family: $font-secondary;
 		font-style: italic;
-		color: $primary;
+		color: $black;
 	}
-	h2{
+
+	h2 {
 		position: relative;
 		font-size: 40px;
 		font-weight: 600;
 		color: $black;
 		font-family: $font-primary;
-		@include media-breakpoint-down(sm){
+
+		@include media-breakpoint-down(sm) {
 			font-size: 28px;
 		}
 	}
-	&.heading-section-white{
-		.subheading{
-			color: rgba(255,255,255,.9);
+
+	&.heading-section-white {
+		.subheading {
+			color: $black;
 		}
-		h2{
+
+		h2 {
 			font-size: 30px;
 			color: $white;
-				&:after, &:before{
+
+			&:after, &:before {
 				display: none;
 			}
 		}
-		p{
+
+		p {
 			color: rgba(255,255,255,.9);
 		}
 	}

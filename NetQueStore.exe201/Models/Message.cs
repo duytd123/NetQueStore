@@ -19,7 +19,7 @@ public partial class Message
 
     public string Message1 { get; set; } = null!;
 
-    public string Status { get; set; } = null!;
+    public string? Status { get; set; } = null!;
 
     public bool IsResolved { get; set; }
 
