@@ -28,43 +28,61 @@
                     @foreach (var food in Model.Foods)
                     {
                         <div class="col-md-4 mb-4">
-                            <div class="card">
+                            <div class="card h-100">
                                 @{
                                     var primaryImage = food.FoodImages?.FirstOrDefault(img => img.IsPrimary)
                                     ?? food.FoodImages?.FirstOrDefault();
                                     var imagePath = primaryImage != null
                                     ? Url.Content("~/images/foods/" + primaryImage.Filename)
                                     : Url.Content("~/images/default.jpg");
+
+                                    var isOutOfStock = food.StockQuantity <= 0;
                                 }
-                                <div class="product-image-wrapper">
-                                    <img src="@imagePath" alt="@food.Name">
-                                </div>
-                                <div class="card-body">
-                                    @if (food.SalePrice.HasValue && food.SalePrice.Value > 0 && food.SalePrice.Value < food.Price)
-                                    {
-                                        <span class="discount">@((int)((1 - food.SalePrice.Value / food.Price) * 100))%</span>
-                                    }
-                                    <h5 class="card-title">@food.Name</h5>
-                                    <p class="card-text">
+                                <a href="/Detail?id=@food.Id" class="product-image-wrapper">
+                                    <img src="@imagePath" class="card-img-top" alt="@food.Name">
+                                </a>
+                                <div class="card-body d-flex flex-column justify-content-between">
+                                    <div>
                                         @if (food.SalePrice.HasValue && food.SalePrice.Value > 0 && food.SalePrice.Value < food.Price)
                                         {
-                                            <span class="original-price">@(food.Price.ToString("N0") + "đ")</span>
-                                            <span class="sale-price">@(food.SalePrice.Value.ToString("N0") + "đ")</span>
+                                            <span class="discount badge bg-danger mb-2">
+                                                -@((int)((1 - food.SalePrice.Value / food.Price) * 100))%
+                                            </span>
                                         }
-                                        else
+                                        <h5 class="card-title">@food.Name</h5>
+                                        <h6 class="text-muted">@food.Unit</h6>
+                                        <p class="card-text">
+                                            @if (food.SalePrice.HasValue && food.SalePrice.Value > 0 && food.SalePrice.Value < food.Price)
+                                            {
+                                                <span class="text-decoration-line-through text-muted">@food.Price.ToString("N0") ₫</span>
+
+                                                <br />
+                                                <span class="fw-bold text-danger">@food.SalePrice.Value.ToString("N0") ₫</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="fw-bold text-primary">@food.Price.ToString("N0") ₫</span>
+                                            }
+                                        </p>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button type="button"
+                                                class="btn btn-warning btn-sm w-100 @(!isOutOfStock ? "" : "disabled")"
+                                                onclick="addToCart(this, @food.Id)"
+                                        @(isOutOfStock ? "title='Out of Stock'" : "")>
+                                            Add to Cart <i class="bi bi-cart4"></i>
+                                        </button>
+                                        @if (isOutOfStock)
                                         {
-                                            <span class="price">@(food.Price.ToString("N0") + "đ")</span>
+                                            <small class="text-danger mt-1 d-block text-center">Out of Stock</small>
                                         }
-                                    </p>
-                                    <button type="button" class="btn btn-warning btn-sm my-2" onclick="addToCart(this, @food.Id)">
-                                        Add to Cart <i class="bi bi-cart4"></i>
-                                    </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
                     }
                 </div>
+
                 <nav aria-label="Page navigation">
                     <ul class="pagination">
                         @for (int i = 1; i <= (int)Math.Ceiling((double)Model.TotalItems / Model.PageSize); i++)
@@ -109,4 +127,5 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 }
+
 

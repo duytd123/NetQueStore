@@ -4,13 +4,35 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>@ViewData["Title"] - WebApplication1</title>
+
+    <title>
+        NetQue Store là dự án khởi nghiệp đầy tâm huyết, với sứ mệnh đưa đặc sản Tây Bắc chính gốc – những tinh hoa văn hóa và ẩm thực vùng cao – đến gần hơn với người tiêu dùng . Chúng tôi cam kết cung cấp các sản phẩm sạch, không chất bảo quản, có nguồn gốc rõ ràng, giá cả phải chăng và dịch vụ tận tâm. NetQue Store không chỉ là nơi mua sắm, mà còn là cầu nối giữa người dân bản địa và khách hàng cả nước, góp phần lan tỏa giá trị nông sản Việt một cách bền vững và uy tín.
+    </title>
+
+    <meta name="description" content="NetQue Store là dự án khởi nghiệp tâm huyết của sinh viên FPT, với mục tiêu đưa đặc sản Tây Bắc – những tinh hoa văn hóa ẩm thực vùng cao – đến gần hơn với người tiêu dùng cả nước. Chúng tôi cam kết mang đến sản phẩm sạch, chuẩn vị, không hóa chất, giá cả hợp lý và dịch vụ tận tâm. Mua sắm dễ dàng – giao hàng nhanh chóng – đồng hành cùng nông sản Việt.">
+
+    <meta name="robots" content="index, follow">
+
+    <!-- Mạng xã hội & SEO nâng cao -->
+    <meta property="og:title" content="NetQue Store – Dự Án Khởi Nghiệp EXE FPT Đưa Đặc Sản Tây Bắc Đến Gần Hơn Với Cộng Đồng Việt">
+    <meta property="og:description" content="Khởi nguồn từ tinh thần đổi mới, sáng tạo và trách nhiệm xã hội của sinh viên FPT, NetQue Store ra đời nhằm quảng bá và phân phối các đặc sản Tây Bắc chính gốc. Sản phẩm sạch, an toàn, giá tốt, dịch vụ uy tín – góp phần nâng cao giá trị nông sản Việt trên thị trường.">
+    <meta property="og:url" content="http://netquestore.somee.com/">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="http://netquestore.somee.com/images/icon1.png" />
+
+    <link rel="icon" type="image/jpeg" href="~/images/icon1.png" />
+
+
+
     @RenderSection("Styles", required: false)
 
     <!-- Bootstrap & site styles -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WebApplication1.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800&display=swap" rel="stylesheet">
@@ -206,13 +228,13 @@
 
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
-                        <li class="nav-item active"><a asp-page="/Index" class="nav-link">Trang Chủ</a></li>                       
+                        <li class="nav-item active"><a asp-page="/Index" class="nav-link">Trang Chủ</a></li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Shop</a>
                             <div class="dropdown-menu" aria-labelledby="dropdown04">
-                                <a class="dropdown-item" asp-page="/specialties">Cửa Hàng</a>
-                                <a class="dropdown-item" asp-page="/Cart">Cart</a>
-                                <a class="dropdown-item" asp-page="/Checkout">Checkout</a>
+                                <a class="dropdown-item" asp-page="/specialties">Cửa hàng</a>
+                                <a class="dropdown-item" asp-page="/Cart">Giỏ hàng</a>
+                                <a class="dropdown-item" asp-page="/Checkout">Thanh toán</a>
                             </div>
                         </li>
                         <li class="nav-item dropdown">
@@ -224,6 +246,10 @@
                                 <p class="mb-0"><strong>Email:</strong> <a href="mailto:hieubuivan646@gmail.com">hieubuivan646@gmail.com</a></p>
                             </div>
                         </li>
+
+                        <li class="nav-item active"><a asp-page="/Aboutme" class="nav-link">Hỗ trợ</a></li>
+
+                        <li class="nav-item active"><a asp-page="/Ai" class="nav-link">Trò chuyện với AI</a></li>
 
 
                         <li class="nav-item dropdown">
@@ -249,7 +275,6 @@
         </nav>
     </header>
     <!-- BODY -->
-    
     @if (ViewData["NoContainer"] == null)
     {
         <div class="container mt-3">
@@ -269,7 +294,7 @@
             <div class="row">
                 <div class="mouse">
                     <a href="#" class="mouse-icon">
-                        <div class="mouse-wheel"><span class="ion-ios-arrow-up"></span></div>
+                        <div class="mouse-wheel"><i class="fas fa-arrow-up"></i></div>
                     </a>
                 </div>
             </div>
@@ -277,10 +302,9 @@
                 <div class="col-md">
                     <div class="ftco-footer-widget mb-4">
                         <h2 class="ftco-heading-2">Nét Quê Store</h2>
-                        <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia.</p>
                         <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
-                            <li class="ftco-animate"><a href="https://www.facebook.com/duyz2.3/"><i class="fab fa-facebook-f"></i></a></li>
-                            <li class="ftco-animate"><a href="https://www.instagram.com/duyz2.3/"><i class="fab fa-instagram"></i></a></li>
+                            <li class="ftco-animate"><a href="https://www.facebook.com/profile.php?id=61576889700715"><i class="fab fa-facebook-f"></i></a></li>
+                            <li class="ftco-animate"><a href="https://www.facebook.com/profile.php?id=61576889700715"><i class="fab fa-instagram"></i></a></li>
                         </ul>
 
                     </div>
@@ -289,8 +313,8 @@
                     <div class="ftco-footer-widget mb-4 ml-md-5">
                         <h2 class="ftco-heading-2">Menu</h2>
                         <ul class="list-unstyled">
-                            <li><a href="#" class="py-2 d-block">Cửa Hàng</a></li>
-                            <li><a href="#" class="py-2 d-block">Liên Hệ Với Chúng Tôi</a></li>
+                            <li><a href="/specialties" class="py-2 d-block">Cửa Hàng</a></li>
+                            <li><a href="/Aboutme" class="py-2 d-block">Liên Hệ Với Chúng Tôi</a></li>
                         </ul>
                     </div>
                 </div>
@@ -298,13 +322,9 @@
                     <div class="ftco-footer-widget mb-4">
                         <h2 class="ftco-heading-2">Help</h2>
                         <div class="d-flex">
-                            <ul class="list-unstyled mr-l-5 pr-l-3 mr-4">
-                                <li><a href="#" class="py-2 d-block">Thông Tin Gửi Hàng</a></li>
-                                <li><a href="#" class="py-2 d-block">Chính Sách Bảo Mật</a></li>
-                            </ul>
                             <ul class="list-unstyled">
-                                <li><a href="#" class="py-2 d-block">FAQs</a></li>
-                                <li><a href="#" class="py-2 d-block">Liên Hệ</a></li>
+                                <li><a href="/Ai" class="py-2 d-block">FAQs</a></li>
+                                <li><a href="/Aboutme" class="py-2 d-block">Liên Hệ</a></li>
                             </ul>
                         </div>
                     </div>
@@ -350,8 +370,6 @@
         </div>
     </footer>
 
-
-  
     <div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee" /><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00" /></svg></div>
     <script src="~/js/jquery.min.js"></script>
     <script src="~/js/jquery-migrate-3.0.1.min.js"></script>

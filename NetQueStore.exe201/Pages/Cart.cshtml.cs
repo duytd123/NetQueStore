@@ -167,7 +167,7 @@ namespace NetQueStore.exe201.Pages
             var foodDict = GetFoodDictionary();
             if (foodDict.Count == 0)
             {
-                errorMessage = "Your cart is empty.";
+                errorMessage = "Giỏ hàng của bạn đang trống.";
                 OnGet();
                 return Page();
             }

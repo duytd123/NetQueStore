@@ -1,0 +1,83 @@
+﻿@page
+@model NetQueStore.exe201.Pages.AiModel
+@{
+    ViewData["Title"] = "Trợ lý ảo Nét Quê";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="chat-header bg-success text-white text-center p-3 rounded-top">
+                    <h5 class="mb-0">Nét Quê ChatBot</h5>
+                </div>
+                <div class="chat-box p-3" id="chat-box" style="height: 400px; overflow-y: auto;">
+                    <!-- Messages will be appended here -->
+                </div>
+                <div class="chat-input d-flex border-top">
+                    <input type="text" id="user-input" class="form-control border-0" placeholder="Nhập tin nhắn...">
+                    <button id="send-btn" class="btn btn-success">Gửi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+            document.addEventListener('DOMContentLoaded', () => {
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+
+                function appendMessage(sender, message) {
+            const msg = document.createElement('div');
+            msg.classList.add('message', 'mb-2');
+            msg.innerHTML = `<strong>${sender === 'user' ? 'Bạn' : 'NétQuêAi'}:</strong> ${message}`;
+
+            msg.classList.add(sender === 'user' ? 'text-end' : 'text-start');
+            msg.classList.add('text-dark');
+            chatBox.appendChild(msg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+
+        setTimeout(() => {
+            appendMessage('ai', 'Xin chào! Tôi là trợ lý ảo của Nét Quê. Tôi có thể giúp gì cho bạn hôm nay?');
+        }, 100);
+
+            async function sendMessage() {
+                const msg = userInput.value.trim();
+                if (!msg) return;
+
+                appendMessage('user', msg);
+                userInput.value = '';
+
+                try {
+                    const response = await fetch('/Ai', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ message: msg })
+                    });
+
+                    if (!response.ok) throw new Error('Lỗi phản hồi từ máy chủ');
+
+                    const data = await response.json();
+                    appendMessage('ai', data.reply);
+                } catch (error) {
+                    appendMessage('ai', 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.');
+                }
+            }
+
+            sendBtn.addEventListener('click', sendMessage);
+            userInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        });
+    </script>
+}
+

@@ -90,7 +90,6 @@ namespace NetQueStore.exe201.Pages
                 })
                 .ToDictionaryAsync(c => c.Id, c => (c.Name, c.ProductCount));
         }
-
     }
 }
 
