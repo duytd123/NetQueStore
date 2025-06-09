@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using NetQueStore.exe201.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace WebApplication1.Pages;
+namespace NetQueStore.exe201.Pages;
 
 public class IndexModel : PageModel
 {
