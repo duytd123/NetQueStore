@@ -1,0 +1,130 @@
+﻿@page
+@model NetQueStore.exe201.Pages.SearchModel
+@{
+    ViewData["Title"] = "Tìm kiếm sản phẩm";
+}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12 text-center mb-4">
+            <h2 class="fw-bold text-primary">Tìm kiếm món đặc sản</h2>
+            <p class="text-muted">Nhập tên món ăn để khám phá các đặc sản Tây Bắc!</p>
+        </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-8">
+            <form method="get" class="d-flex" id="pageSearchForm">
+                <input asp-for="Query" class="form-control me-2 py-2" id="pageSearchInput" placeholder="Nhập tên món ăn..." autocomplete="off" />
+                <button type="submit" class="btn btn-primary py-2 px-4">
+                    <i class="bi bi-search"></i> Tìm kiếm
+                </button>
+            </form>
+            <span class="text-danger" asp-validation-for="Query"></span>
+        </div>
+    </div>
+
+    <!-- Search Results -->
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="alert alert-warning animate__animated animate__fadeIn">
+                    @Model.Message
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var food in Model.Foods)
+            {
+                var image = food.FoodImages.FirstOrDefault(i => i.IsPrimary)?.Filename ?? "default.png";
+                <div class="col-lg-3 col-md-6 col-sm-12">
+                    <div class="product-card card shadow-sm h-100 animate__animated animate__fadeInUp">
+                        <a href="/Detail?id=@food.Id" class="product-image-wrapper">
+                            <img src="/images/foods/@image" class="product-image" alt="@food.Name" />
+                        </a>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title mb-2">@food.Name</h5>
+                            <p class="text-muted mb-1">@food.Unit</p>
+                            @if (food.SalePrice.HasValue && food.SalePrice < food.Price)
+                            {
+                                <p class="text-decoration-line-through text-muted mb-1">@food.Price.ToString("N0") ₫</p>
+                                <p class="price text-success fw-semibold mb-3">@food.SalePrice.Value.ToString("N0") ₫</p>
+                            }
+                            else
+                            {
+                                <p class="price text-success fw-semibold mb-3">@food.Price.ToString("N0") ₫</p>
+                            }
+                            <a href="/Detail?id=@food.Id" class="btn btn-outline-primary mt-auto">
+                                <i class="bi bi-eye me-1"></i> Xem chi tiết
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet" />
+    <style>
+        .product-card {
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+            .product-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            }
+
+        .product-image-wrapper {
+            height: 200px;
+            background: radial-gradient(circle at center, #ffffff 50%, #d4edff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .product-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+
+        .price {
+            font-size: 1.2rem;
+        }
+
+        #pageSearchInput:focus {
+            border-color: #e67700;
+            box-shadow: 0 0 5px rgba(230, 119, 0, 0.5);
+        }
+    </style>
+    <script>
+        $(document).ready(function () {
+            $('#pageSearchInput').on('input', function () {
+                var query = $(this).val().trim();
+                if (query.length >= 3) {
+                    // Gửi request lấy gợi ý chứ không submit
+                    $.ajax({
+                        url: '/Search?handler=Suggestions&query=' + encodeURIComponent(query),
+                        method: 'GET',
+                        success: function (data) {
+                            console.log(data); // TODO: hiển thị gợi ý
+                            // Hiển thị ra dropdown gợi ý nếu bạn muốn
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}

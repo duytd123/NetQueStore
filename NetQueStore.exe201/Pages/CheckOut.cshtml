@@ -6,7 +6,6 @@
 @await Html.PartialAsync("_CheckoutSteps")
 
 <div class="container mt-4">
-
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success mt-3">
@@ -21,129 +20,158 @@
     }
 
     <!-- COUPON SECTION -->
-    <div class="container">
-        <div class="mb-4">
-            <a href="#" id="toggleCoupon" class="text-success d-block fw-semibold">
-                Bạn có mã giảm giá ? Ấn vào đây để nhập mã
-            </a>
-
-            <div id="couponForm" class="mt-2 p-3 border border-success" style="display: none;">
-                <input type="text" class="form-control mb-2" placeholder="Nếu bạn có mã giảm giá, vui lòng áp dụng bên dưới." />
-                <button type="button" class="btn btn-success">ÁP DỤNG MÃ GIẢM GIÁ</button>
-            </div>
+    <div class="mb-4">
+        <a href="#" id="toggleCoupon" class="text-success d-block fw-semibold">
+            Bạn có mã giảm giá? Ấn vào đây để nhập mã
+        </a>
+        <div id="couponForm" class="mt-2 p-3 border border-success" style="display: none;">
+            <input type="text" class="form-control mb-2" placeholder="Nếu bạn có mã giảm giá, vui lòng áp dụng bên dưới." />
+            <button type="button" class="btn btn-success">ÁP DỤNG MÃ GIẢM GIÁ</button>
         </div>
-
-        <form method="post">
-            <div class="row">
-                <!-- Left: Billing -->
-                <div class="col-md-7">
-                    <h5 class="mb-3">CHI TIẾT THANH TOÁN</h5>
-
-                    <div class="mb-3">
-                        <label class="form-label">Họ tên *</label>
-                        <input asp-for="FullName" class="form-control" />
-                        <span asp-validation-for="FullName" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Địa chỉ *</label>
-                        <input asp-for="Address" class="form-control" />
-                        <span asp-validation-for="Address" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Số điện thoại *</label>
-                        <input asp-for="Phone" class="form-control" />
-                        <span asp-validation-for="Phone" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input asp-for="Email" class="form-control" />
-                        <span asp-validation-for="Email" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <input class="form-control" placeholder="Ghi rõ địa chỉ giao hàng…" asp-for="Notes" />
-                    </div>
-                </div>
-
-                <!-- Right: Order Summary -->
-                <div class="col-md-5">
-                    <div class="border p-3">
-                        <h5 class="mb-3">Đơn hàng </h5>
-
-                        <div class="mb-3">
-                            @foreach (var item in Model.ListOrderItems)
-                            {
-                                <div class="d-flex justify-content-between">
-                                    <span>Product: @item.Name × @Model.FoodQuantities[item.Id]</span>
-                                    <span>@String.Format("{0:N0}₫", item.Price * Model.FoodQuantities[item.Id])</span>
-                                </div>
-                            }
-                        </div>
-
-                        <hr />
-
-                        <div class="mb-2">
-                            <div class="d-flex justify-content-between">
-                                <strong>Tạm tính:</strong>
-                                <span>@String.Format("{0:N0}₫", Model.Subtotal)</span>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <strong>Phí Ship:</strong>
-                                <span>@String.Format("{0:N0}₫", Model.ShippingFee)</span>
-                            </div>
-                            <div class="d-flex justify-content-between fw-bold">
-                                <strong>Tổng thanh toán:</strong>
-                                <span>@String.Format("{0:N0}₫", Model.Total)</span>
-                            </div>
-                        </div>
-
-                        <hr />
-
-                        <div class="mb-3">
-                            @foreach (var method in Model.PaymentMethods)
-                            {
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="PaymentMethodId" value="@method.Id"
-                                    @(Model.PaymentMethodId == method.Id ? "checked" : "") />
-                                    <label class="form-check-label fw-semibold">@method.Code</label>
-                                </div>
-                                @if (!string.IsNullOrWhiteSpace(method.Instructions))
-                                {
-                                    <div class="text-muted ms-4 mb-2" style="font-size: 0.9em;">
-                                        @method.Instructions
-                                    </div>
-                                }
-                            }
-                            <span asp-validation-for="PaymentMethodId" class="text-danger"></span>
-                        </div>
-
-                        <button type="submit" class="btn btn-success w-100 mt-2">ĐẶT HÀNG</button>
-
-                        <p class="text-muted small mt-2">
-                            Dữ liệu cá nhân của bạn sẽ được sử dụng để xử lý đơn hàng của bạn, hỗ trợ trải nghiệm của bạn trên toàn bộ trang web này và cho các mục đích khác được mô tả trong chính sách bảo mật của chúng tôi.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </form>
     </div>
 
-    @section Scripts {
-        <partial name="_ValidationScriptsPartial" />
-        <script>
-            document.getElementById("toggleCoupon").addEventListener("click", function (e) {
+    <form method="post" id="checkoutForm" asp-page="/Checkout">
+        @Html.AntiForgeryToken()
+        <div class="row">
+            <!-- Left: Billing -->
+            <div class="col-md-7">
+                <h5 class="mb-3">CHI TIẾT THANH TOÁN</h5>
+                <div class="mb-3">
+                    <label class="form-label">Họ tên *</label>
+                    <input asp-for="FullName" class="form-control" />
+                    <span asp-validation-for="FullName" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Địa chỉ *</label>
+                    <input asp-for="Address" class="form-control" />
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Số điện thoại *</label>
+                    <input asp-for="Phone" class="form-control" />
+                    <span asp-validation-for="Phone" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <input class="form-control" placeholder="Ghi rõ địa chỉ giao hàng…" asp-for="Notes" />
+                </div>
+            </div>
+            <!-- Right: Order Summary -->
+            <div class="col-md-5">
+                <div class="border p-3">
+                    <h5 class="mb-3">Đơn hàng</h5>
+                    <div class="mb-3">
+                        @foreach (var item in Model.ListOrderItems)
+                        {
+                            <div class="d-flex justify-content-between">
+                                <span>Sản phẩm: @item.Name × @Model.FoodQuantities[item.Id]</span>
+                                <span>@String.Format("{0:N0}₫", item.Price * Model.FoodQuantities[item.Id])</span>
+                            </div>
+                        }
+                    </div>
+                    <hr />
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between">
+                            <strong>Tạm tính:</strong>
+                            <span>@String.Format("{0:N0}₫", Model.Subtotal)</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <strong>Phí Ship:</strong>
+                            <span>@String.Format("{0:N0}₫", Model.ShippingFee)</span>
+                        </div>
+                        <div class="d-flex justify-content-between fw-bold">
+                            <strong>Tổng thanh toán:</strong>
+                            <span>@String.Format("{0:N0}₫", Model.Total)</span>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="mb-3">
+                        @foreach (var method in Model.PaymentMethods)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="PaymentMethodId" id="paymentMethod_@method.Id" value="@method.Id"
+                                @(Model.PaymentMethodId == method.Id ? "checked" : "") />
+                                <label class="form-check-label fw-semibold" for="paymentMethod_@method.Id">@method.Code</label>
+                            </div>
+                            @if (!string.IsNullOrWhiteSpace(method.Instructions))
+                            {
+                                <div class="text-muted ms-4 mb-2" style="font-size: 0.9em;">
+                                    @method.Instructions
+                                </div>
+                            }
+                        }
+                        <span asp-validation-for="PaymentMethodId" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 mt-2" id="placeOrderButton">ĐẶT HÀNG</button>
+                    <p class="text-muted small mt-2">
+                        Dữ liệu cá nhân của bạn sẽ được sử dụng để xử lý đơn hàng của bạn, hỗ trợ trải nghiệm của bạn trên toàn bộ trang web này và cho các mục đích khác được mô tả trong chính sách bảo mật của chúng tôi.
+                    </p>
+                    <div id="form-error" class="text-danger mt-2" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Toggle coupon form
+            $("#toggleCoupon").click(function (e) {
                 e.preventDefault();
-                const form = document.getElementById("couponForm");
-                form.style.display = form.style.display === "none" ? "block" : "none";
+                const form = $("#couponForm");
+                form.slideToggle();
             });
 
-             setTimeout(() => {
-                document.querySelectorAll('.alert').forEach(el => el.remove());
+            // Auto-hide alerts
+            setTimeout(() => {
+                $('.alert').fadeOut('slow', function () { $(this).remove(); });
             }, 5000);
-        </script>
-    }
 
+            // Form submission with AJAX
+            $('#checkoutForm').on('submit', function (e) {
+                e.preventDefault();
+                var form = $(this);
+                var button = $('#placeOrderButton');
+                var errorDiv = $('#form-error');
 
+                errorDiv.hide();
+                button.prop('disabled', true).text('Đang xử lý...');
+
+                $.ajax({
+                    url: form.attr('action'),
+                    method: 'POST',
+                    data: form.serialize(),
+                    headers: {
+                        'RequestVerificationToken': form.find('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (response) {
+                        console.log('Checkout response:', response);
+                        if (response.redirectUrl) {
+                            window.location.href = response.redirectUrl;
+                        } else {
+                            document.open();
+                            document.write(response);
+                            document.close();
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error('Checkout error:', xhr);
+                        var errorMessage = xhr.responseJSON?.message || xhr.responseText || 'Lỗi khi đặt hàng, vui lòng thử lại.';
+                        errorDiv.text(errorMessage).show();
+                        button.prop('disabled', false).text('ĐẶT HÀNG');
+                    },
+                    complete: function () {
+                        button.prop('disabled', false).text('ĐẶT HÀNG');
+                    }
+                });
+            });
+        });
+    </script>
+}

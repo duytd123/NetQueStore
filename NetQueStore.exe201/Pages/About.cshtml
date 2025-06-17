@@ -1,0 +1,205 @@
+﻿@page
+@model NetQueStore.exe201.Pages.AboutModel
+@{
+}
+
+<!-- About Start -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet" />
+<style>
+    .parallax-bg {
+        background: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+        background-size: cover;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .parallax-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(39, 174, 96, 0.8), rgba(211, 84, 0, 0.8));
+            animation: gradientShift 8s ease infinite;
+        }
+
+    {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+
+    }
+
+    .content-card {
+        background: rgba(255, 255, 255, 0.85);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: transform 0.4s ease;
+    }
+
+        .content-card:hover {
+            transform: translateY(-10px);
+        }
+
+    .team-member {
+        position: relative;
+        overflow: hidden;
+        border-radius: 15px;
+        background: linear-gradient(145deg, #ffffff, #e6e6e6);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+
+        .team-member img {
+            transition: transform 0.5s ease, filter 0.5s ease;
+            filter: grayscale(20%);
+        }
+
+        .team-member:hover img {
+            transform: scale(1.15);
+            filter: grayscale(0%);
+        }
+
+    .team-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 10px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .team-member:hover .team-overlay {
+        opacity: 1;
+    }
+
+    .team-member h5 {
+        color: white !important;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+    }
+    .section-title {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 30px;
+        color: #ffffff;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(to right, #27ae60, #e67e22);
+            border-radius: 2px;
+        }
+
+    p, a {
+        color: #ffffff;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary {
+        background: #e67e22;
+        border: none;
+        transition: background 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background: #d35400;
+        }
+</style>
+
+<div class="container-fluid about py-5 parallax-bg">
+    <div class="container py-5">
+        <div class="content-card p-5 animate__animated animate__fadeIn">
+            <div class="row g-5 align-items-center">
+                <!-- About Section -->
+                <div class="col-lg-6">
+                    <div class="text-center text-lg-start">
+                        <h1 class="section-title animate__animated animate__zoomIn">Khám phá Tây Bắc</h1>
+                        <p class="mb-4 animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+                            Website Nét Quê là hành trình mang hương vị núi rừng đến từng bữa ăn. Từ những món ăn truyền thống được chế biến thủ công đến các sáng tạo ẩm thực mới lạ, chúng tôi cam kết mang lại trải nghiệm độc đáo, đậm chất vùng cao.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <img src="/images/bg_5.jpg" class="img-fluid rounded-3 animate__animated animate__fadeInRight" alt="Ẩm thực Tây Bắc">
+                </div>
+
+                <!-- Story Section -->
+                <div class="col-12 mt-5">
+                    <div class="text-center">
+                        <h2 class="section-title animate__animated animate__zoomIn">Câu chuyện của chúng tôi</h2>
+                        <p class="mb-4 mx-auto animate__animated animate__fadeInUp" style="max-width: 900px; animation-delay: 0.2s;">
+                            Sinh ra từ tình yêu với văn hóa Tây Bắc, chúng tôi bắt đầu hành trình với giấc mơ lan tỏa tinh hoa ẩm thực vùng cao. Hợp tác với các nghệ nhân địa phương, mỗi món ăn là một câu chuyện về thiên nhiên, con người, và truyền thống. Hãy cùng chúng tôi viết tiếp câu chuyện này!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Team Section -->
+                <div class="col-12 mt-5">
+                    <h2 class="section-title text-center animate__animated animate__zoomIn">Những người tiên phong</h2>
+                    <div class="row g-4 justify-content-center">
+                        <div class="col-lg-4 col-md-6 animate__animated animate__slideInUp" style="animation-delay: 0.1s;">
+                            <div class="team-member text-center p-4">
+                                <img src="/images/minh.jpg" class="img-fluid rounded-circle mb-3" alt="Thành viên 1">
+                                <div class="team-overlay">
+                                    <h5>Nguyễn Hoàng Minh</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6 animate__animated animate__slideInUp" style="animation-delay: 0.3s;">
+                            <div class="team-member text-center p-4">
+                                <img src="/images/duy.jpg" class="img-fluid rounded-circle mb-3" alt="Thành viên 2">
+                                <div class="team-overlay">
+                                    <h5>Trần Đức Duy</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6 animate__animated animate__slideInUp" style="animation-delay: 0.5s;">
+                            <div class="team-member text-center p-4">
+                                <img src="" class="img-fluid rounded-circle mb-3" alt="Thành viên 3">
+                                <div class="team-overlay">
+                                    <h5>Nguyễn Quốc Việt</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-6 animate__animated animate__slideInUp" style="animation-delay: 0.5s;">
+                            <div class="team-member text-center p-4">
+                                <img src="/images/hieu.jpg" class="img-fluid rounded-circle mb-3" alt="Thành viên 3">
+                                <div class="team-overlay">
+                                    <h5>Bùi Văn Hiếu</h5>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-6 animate__animated animate__slideInUp" style="animation-delay: 0.5s;">
+                            <div class="team-member text-center p-4">
+                                <img src="/images/long.jpg" class="img-fluid rounded-circle mb-3" alt="Thành viên 3">
+                                <div class="team-overlay">
+                                    <h5>Hoàng Mạnh Long</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -98,12 +98,7 @@
             </div>
         </div>
         <div class="col-md-3 filter-section">
-            <h4>LỌC GIÁ</h4>
-            <input type="range" min="0" max="148500" value="@Model.MinPrice"
-                   oninput="this.nextElementSibling.value = this.value + 'đ - 148.500đ'"
-                   onchange="location.href='?minPrice=' + this.value + '&maxPrice=148500&page=1&sortOrder=@Model.SortOrder'">
-            <output>@(Model.MinPrice.ToString("N0") + "đ - 1000.000đ")</output>
-
+            
             <h4>NHÓM SẢN PHẨM</h4>
             <ul class="list-group">
                 <li class="list-group-item d-flex justify-content-between align-items-center">

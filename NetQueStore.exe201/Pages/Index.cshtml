@@ -306,26 +306,79 @@
 				<span>Nhận email cập nhật về các cửa hàng mới nhất và các ưu đãi đặc biệt của chúng tôi</span>
 			</div>
 			<div class="col-md-6 d-flex align-items-center">
-				<form method="post" class="subscribe-form">
+				<form method="post" class="subscribe-form" id="subscribe-form">
+					@Html.AntiForgeryToken()
 					<div class="form-group d-flex">
 						<input asp-for="Email" class="form-control" placeholder="Nhập email của bạn để được hỗ trợ!" />
 						<input type="submit" value="Subscribe" class="submit px-3" />
 					</div>
 					<span class="text-danger" asp-validation-for="Email"></span>
-					@if (!string.IsNullOrEmpty(Model.Message))
-					{
-						<div class="mt-2 alert alert-info">@Model.Message</div>
-					}
+					<div id="form-message" class="mt-2" style="display: none;"></div>
 				</form>
-
 			</div>
 		</div>
 	</div>
 </section>
 
+@section Scripts {
+	<style>
+		#form-message.alert {
+			padding: 10px;
+			border-radius: 5px;
+			font-size: 0.9rem;
+		}
+
+		#form-message.alert-success {
+			background-color: #d4edda;
+			color: #155724;
+		}
+
+		#form-message.alert-danger {
+			background-color: #f8d7da;
+			color: #721c24;
+		}
+
+		#form-message.alert-info {
+			background-color: #d1ecf1;
+			color: #0c5460;
+		}
+	</style>
+	<script>
+		$(document).ready(function () {
+			$("#subscribe-form").on("submit", function (e) {
+				e.preventDefault();
+				var form = $(this);
+				var messageDiv = $("#form-message");
+				messageDiv.hide().removeClass("alert alert-success alert-danger alert-info");
+
+				$.ajax({
+					url: "/Index",
+					method: "POST",
+					data: form.serialize(),
+					success: function (response) {
+						var newMessage = $(response).find("#form-message").html();
+						messageDiv.html(newMessage || "Đăng ký thành công! Cảm ơn bạn đã quan tâm.")
+							.addClass("alert alert-success animate__animated animate__fadeIn")
+							.show();
+						form[0].reset();
+					},
+					error: function (xhr) {
+						var errorMessage = "Đã xảy ra lỗi, vui lòng thử lại!";
+						if (xhr.status === 400) {
+							errorMessage = "Email không hợp lệ hoặc đã được đăng ký!";
+						}
+						messageDiv.html(errorMessage)
+							.addClass("alert alert-danger animate__animated animate__fadeIn")
+							.show();
+					}
+				});
+			});
+		});
+	</script>
+}
+
 
 <style>
-
 
 	.promo-time-box {
 		font-size: 2rem;

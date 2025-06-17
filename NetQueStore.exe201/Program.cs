@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.EntityFrameworkCore;
 using Net.payOS;
 using NetQueStore.exe201.Models;
 using NetQueStore.exe201.Services.Payos;
@@ -14,6 +16,11 @@ public class Program
 
         builder.Services.AddRazorPages();
 
+        builder.Services.AddAntiforgery(options =>
+        {
+            options.HeaderName = "X-CSRF-TOKEN"; 
+        });
+
         builder.Services.AddDbContext<Exe2Context>(options =>
            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
        );
@@ -24,6 +31,20 @@ public class Program
             options.IdleTimeout = TimeSpan.FromMinutes(30);
             options.Cookie.HttpOnly = true;
             options.Cookie.IsEssential = true;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.None;
+            options.Cookie.SameSite = SameSiteMode.Lax;
+        });
+
+        builder.Services.Configure<CookiePolicyOptions>(options =>
+        {
+            options.MinimumSameSitePolicy = SameSiteMode.Lax;
+            options.HttpOnly = HttpOnlyPolicy.Always;
+            options.Secure = CookieSecurePolicy.None; 
+        });
+
+        builder.Services.Configure<KestrelServerOptions>(options =>
+        {
+            options.Limits.MaxRequestBodySize = 30 * 1024 * 1024; 
         });
 
         builder.Logging.ClearProviders();
@@ -39,7 +60,7 @@ public class Program
 
         builder.Services.AddSingleton<PayOSService>(sp =>
         {
-            var configuration = sp.GetRequiredService<IConfiguration>(); // lấy config từ DI container
+            var configuration = sp.GetRequiredService<IConfiguration>(); 
             var logger = sp.GetRequiredService<ILogger<PayOSService>>();
 
             var payos = new PayOS(
@@ -62,7 +83,6 @@ public class Program
         else
         {
             app.UseExceptionHandler("/Home/Error");
-            app.UseHsts();
         }
 
         //app.UseHttpsRedirection();
@@ -73,6 +93,8 @@ public class Program
         app.UseStatusCodePages();
 
         app.UseSession();
+
+        app.UseAntiforgery();
 
         app.Use(async (context, next) =>
         {

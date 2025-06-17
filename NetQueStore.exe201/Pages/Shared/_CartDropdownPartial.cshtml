@@ -50,21 +50,21 @@ else
     </li>
     <li><hr class="dropdown-divider" /></li>
     <li class="d-flex justify-content-between">
-        <span>Subtotal:</span>
+        <span>Tạm tính:</span>
         <span>@subtotal.ToString("N0") ₫</span>
     </li>
     <li class="d-flex justify-content-between">
-        <span>ShipFee:</span>
+        <span>Phí vận chuyển:</span>
         <span>@shippingFee.ToString("N0") ₫</span>
     </li>
     <li class="d-flex justify-content-between fw-bold">
-        <span>Total:</span>
+        <span>Tổng cộng:</span>
         <span>@total.ToString("N0") ₫</span>
     </li>
     <li><hr class="dropdown-divider" /></li>
     <li class="d-flex justify-content-between">
-        <a href="/Cart" class="btn btn-sm btn-primary flex-grow-1 me-1">VIEW CART</a>
-        <a href="/Checkout" class="btn btn-sm btn-success flex-grow-1 ms-1">CHECKOUT</a>
+        <a href="/Cart" class="btn btn-sm btn-primary flex-grow-1 me-1">Xem giỏ hàng</a>
+        <a href="/Checkout" class="btn btn-sm btn-success flex-grow-1 ms-1">Thanh toán</a>
     </li>
 }
 
@@ -101,7 +101,6 @@ else
                     // Cập nhật dropdown
                     document.getElementById("CartDropdownContent").innerHTML = html;
 
-                    // Cập nhật số lượng món hiển thị trên biểu tượng cart
                     document.getElementById("FoodCountBadge").innerText = parts.length;
                 });
         }

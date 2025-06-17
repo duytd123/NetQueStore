@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NetQueStore.exe201.Models;
 
@@ -16,7 +17,7 @@ public partial class Message
     public string Phone { get; set; } = null!;
 
     public string Subject { get; set; } = null!;
-
+    [Column("message")]
     public string Message1 { get; set; } = null!;
 
     public string Status { get; set; } = null!;

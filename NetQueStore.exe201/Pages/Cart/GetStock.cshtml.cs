@@ -18,7 +18,7 @@ namespace NetQueStore.exe201.Pages.Cart
         {
             var food = _context.Foods.FirstOrDefault(f => f.Id == foodId && f.IsActive);
             if (food == null)
-                return new JsonResult(new { success = false, message = "Food not found" });
+                return new JsonResult(new { success = false, message = "Không tìm thấy đồ ăn" });
 
             return new JsonResult(new { success = true, stockQuantity = food.StockQuantity });
         }
