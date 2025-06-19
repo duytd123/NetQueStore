@@ -29,22 +29,41 @@ namespace NetQueStore.exe201.Pages.Admin
         [TempData]
         public string StatusMessage { get; set; }
 
-        public async Task<IActionResult> OnGetAsync()
+        public int CurrentPage { get; set; } = 1;
+        public int TotalPages { get; set; }
+        public const int PageSize = 10;
+
+        public async Task<IActionResult> OnGetAsync([FromQuery(Name = "page")] int page = 1)
         {
+            Console.WriteLine($"Received page parameter: {page}");
             var isLoggedIn = HttpContext.Session.GetString("AdminLoggedIn");
             if (string.IsNullOrEmpty(isLoggedIn))
             {
                 return RedirectToPage("/Admin/Login");
             }
 
+            CurrentPage = page < 1 ? 1 : page;
+            var totalOrders = await _context.Orders.CountAsync();
+            TotalPages = (int)Math.Ceiling(totalOrders / (double)PageSize);
+
+            Console.WriteLine($"OnGetAsync - Page: {CurrentPage}, Total Orders: {totalOrders}, Total Pages: {TotalPages}");
+
             Orders = await _context.Orders
-                .OrderByDescending(o => o.OrderDate)
+                .OrderByDescending(o => o.Id)
+                .Skip((CurrentPage - 1) * PageSize)
+                .Take(PageSize)
                 .ToListAsync();
+
+            Console.WriteLine($"Orders Count on Page {CurrentPage}: {Orders.Count}");
+            foreach (var order in Orders)
+            {
+                Console.WriteLine($"Order ID: {order.Id}, Order Number: {order.OrderNumber}, Date: {order.OrderDate}");
+            }
 
             return Page();
         }
 
-        public async Task<IActionResult> OnPostUpdateStatusAsync()
+        public async Task<IActionResult> OnPostUpdateStatusAsync(int SelectedOrderId, string SelectedOrderStatus, int page)
         {
             var order = await _context.Orders.FindAsync(SelectedOrderId);
             if (order == null)
@@ -55,18 +74,15 @@ namespace NetQueStore.exe201.Pages.Admin
             if (order.PaymentStatus?.ToLower() == "paid")
             {
                 StatusMessage = "Không thể chỉnh sửa đơn hàng đã thanh toán.";
-                Orders = await _context.Orders.OrderByDescending(o => o.OrderDate).ToListAsync();
-                return Page();
+            }
+            else
+            {
+                order.OrderStatus = SelectedOrderStatus;
+                await _context.SaveChangesAsync();
+                StatusMessage = $"Đã cập nhật trạng thái đơn hàng #{order.OrderNumber} thành '{SelectedOrderStatus}'";
             }
 
-            order.OrderStatus = SelectedOrderStatus;
-            await _context.SaveChangesAsync();
-
-            StatusMessage = $"Đã cập nhật trạng thái đơn hàng #{order.OrderNumber} thành '{SelectedOrderStatus}'";
-
-            Orders = await _context.Orders.OrderByDescending(o => o.OrderDate).ToListAsync();
-
-            return Page();
+            return RedirectToPage(new { page });
         }
 
     }

@@ -12,7 +12,8 @@ public class IndexModel : PageModel
     private readonly Exe2Context _context;
     private readonly ILogger<IndexModel> _logger;
 
-    public List<Food> Foods { get; set; } = new();
+    public List<Food> Foods { get; set; } = new(); 
+    public List<Food> SpecialFoods { get; set; } = new(); 
     public List<Category> Categories { get; set; } = new();
 
     [BindProperty]
@@ -34,16 +35,31 @@ public class IndexModel : PageModel
         Categories = _context.Categories
             .Take(4)
             .ToList();
-
+        // Lấy 8 sản phẩm bán chạy (không bao gồm combo)
         Foods = _context.Foods
             .Include(f => f.FoodImages)
             .Include(f => f.Category)
             .Include(f => f.Region)
             .Include(f => f.Province)
-            .Where(f => f.IsActive)
+            .Where(f => f.IsActive && !f.IsSpecial) // Loại bỏ sản phẩm đặc biệt
             .OrderByDescending(f => f.StockQuantity)
             .Take(8)
             .ToList();
+
+        // Lấy tất cả sản phẩm đặc biệt
+        SpecialFoods = _context.Foods
+            .Include(f => f.FoodImages)
+            .Include(f => f.Category)
+            .Include(f => f.Region)
+            .Include(f => f.Province)
+            .Where(f => f.IsActive && f.IsSpecial)
+            .ToList();
+        _logger.LogInformation("Number of SpecialFoods: {Count}", SpecialFoods.Count);
+        foreach (var food in SpecialFoods)
+        {
+            _logger.LogInformation("SpecialFood - ID: {Id}, Name: {Name}, IsSpecial: {IsSpecial}, IsActive: {IsActive}, Stock: {Stock}",
+                food.Id, food.Name, food.IsSpecial, food.IsActive, food.StockQuantity);
+        }
     }
 
     public async Task<IActionResult> OnPostAsync()

@@ -1,5 +1,5 @@
 ﻿@page
-@model NetQueStore.exe201.Pages.Admin.Dashboard
+@model NetQueStore.exe201.Pages.Admin.DashboardModel
 
 @{
     Layout = "_AdminLayout";
@@ -48,14 +48,29 @@
                 <div class="card-body">
                     <h5 class="card-title">Thông tin đơn hàng mới nhất</h5>
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item">Đơn #12345 - Khách: Nguyễn Văn A - $120.00</li>
-                        <li class="list-group-item">Đơn #12344 - Khách: Trần Thị B - $340.00</li>
-                        <li class="list-group-item">Đơn #12343 - Khách: Lê Văn C - $90.00</li>
+                        @if (Model.LatestOrders != null && Model.LatestOrders.Any())
+                        {
+                            foreach (var order in Model.LatestOrders)
+                            {
+                                <li class="list-group-item">
+                                    Đơn @order.OrderNumber -
+                                    Khách: @order.RecipientName -
+                                    Ngày Đặt: @order.CreatedAt -
+                                    @order.TotalAmount.ToString("N0") ₫
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="list-group-item">Chưa có đơn hàng nào</li>
+                        }
                     </ul>
+
                 </div>
             </div>
         </div>
     </div>
+
 </div>
 
 <form method="post" asp-page-handler="Logout">

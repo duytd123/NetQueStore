@@ -51,6 +51,7 @@
                             {
                                 <form method="post" asp-page-handler="UpdateStatus" class="d-flex gap-2 align-items-center">
                                     <input type="hidden" name="SelectedOrderId" value="@order.Id" />
+                                    <input type="hidden" name="page" value="@Model.CurrentPage" />
                                     <select name="SelectedOrderStatus" class="form-select form-select-sm w-auto">
                                         @foreach (var status in statusList)
                                         {
@@ -86,5 +87,28 @@
                 }
             </tbody>
         </table>
+
     </div>
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(Model.CurrentPage == 1 ? "disabled" : "")">
+                    <a class="page-link" href="?page=@(Model.CurrentPage - 1)">Trước</a>
+                </li>
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link" href="?page=@i">@i</a>
+                    </li>
+                }
+                <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" href="?page=@(Model.CurrentPage + 1)">Tiếp</a>
+                </li>
+            </ul>
+        </nav>
+    }
+
 </div>

@@ -69,12 +69,12 @@
                                         <button type="button"
                                                 class="btn btn-warning btn-sm w-100 @(!isOutOfStock ? "" : "disabled")"
                                                 onclick="addToCart(this, @food.Id)"
-                                        @(isOutOfStock ? "title='Out of Stock'" : "")>
-                                            Add to Cart <i class="bi bi-cart4"></i>
+                                        @(isOutOfStock ? "title='>Quá số lượng trong kho'" : "")>
+                                            Thêm vào giỏ hàng <i class="bi bi-cart4"></i>
                                         </button>
                                         @if (isOutOfStock)
                                         {
-                                            <small class="text-danger mt-1 d-block text-center">Out of Stock</small>
+                                            <small class="text-danger mt-1 d-block text-center">Quá số lượng trong kho</small>
                                         }
                                     </div>
                                 </div>
