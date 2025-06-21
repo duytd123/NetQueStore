@@ -45,7 +45,20 @@
                                         <span>@item.Name</span>
                                     </div>
                                 </td>
-                                <td>@item.Price.ToString("N0") ₫</td>
+                                <td>
+                                    @if (item.SalePrice != null && item.SalePrice < item.Price)
+                                    {
+                                        <span class="text-success fw-bold">@item.SalePrice.Value.ToString("N0") ₫</span>
+
+                                        <br />
+                                        <small class="text-danger text-decoration-line-through">@item.Price.ToString("N0") ₫</small>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-success fw-bold">@item.Price.ToString("N0") ₫</span>
+                                    }
+                                </td>
+
                                 <td>
                                     <div class="input-group" style="max-width: 140px;">
                                         <a class="btn btn-outline-secondary" href="/Cart?action=sub&id=@item.Id">-</a>
@@ -54,8 +67,14 @@
                                     </div>
                                 </td>
                                 <td>
-                                    @((item.Price * quantity).ToString("N0")) ₫
+                                    @{
+                                        var unitPrice = (item.SalePrice != null && item.SalePrice < item.Price)
+                                        ? item.SalePrice.Value
+                                        : item.Price;
+                                    }
+                                    @((unitPrice * quantity).ToString("N0") + " ₫")
                                 </td>
+
                                 <td>
                                     <a href="/Cart?action=delete&id=@item.Id" title="Xoá sản phẩm">
                                         <i class="bi bi-trash text-danger h5"></i>
@@ -78,7 +97,7 @@
             <div class="card border p-3">
                 <h5>TỔNG CỘNG</h5>
                 <div class="d-flex justify-content-between border-bottom py-2">
-                    <span>Tạm tính</span>
+                    <span>Tạm tính</span>                  
                     <strong>@Model.Subtotal.ToString("N0") ₫</strong>
                 </div>
 

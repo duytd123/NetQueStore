@@ -60,7 +60,7 @@
 
 </head>
 
-    
+
     @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
     @inject NetQueStore.exe201.Models.Exe2Context _context
     @using Microsoft.EntityFrameworkCore
@@ -98,7 +98,8 @@
     foreach (var food in foodsInCart)
     {
         int qty = foodQuantities[food.Id];
-        subtotal += food.Price * qty;
+        decimal priceToUse = food.SalePrice.HasValue && food.SalePrice < food.Price ? food.SalePrice.Value : food.Price;
+        subtotal += priceToUse * qty;
     }
 
     string? provinceIdStr = HttpContextAccessor.HttpContext.Session.GetString("province_id");
@@ -230,6 +231,7 @@
                 <div class="collapse navbar-collapse" id="ftco-nav">
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item active"><a asp-page="/Index" class="nav-link">Trang Chủ</a></li>
+                        <li class="nav-item active"><a asp-page="/About" class="nav-link">Về chúng tôi</a></li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="dropdown04" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Shop</a>
                             <div class="dropdown-menu" aria-labelledby="dropdown04">
@@ -239,18 +241,8 @@
                                 <a class="dropdown-item" href="/Order">Kiểm tra đơn hàng</a>
                             </div>
                         </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="contactDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Liên Hệ
-                            </a>
-                            <div class="dropdown-menu p-3" aria-labelledby="contactDropdown">
-                                <p class="mb-1"><strong>SĐT:</strong> <a href="tel:0865033812">0865 033 812</a></p>
-                                <p class="mb-0"><strong>Email:</strong> <a href="mailto:hieubuivan646@gmail.com">hieubuivan646@gmail.com</a></p>
-                            </div>
-                        </li>
                         <li class="nav-item active"><a asp-page="/Aboutme" class="nav-link">Hỗ trợ</a></li>
-                        <li class="nav-item active"><a asp-page="/Ai" class="nav-link">AI</a></li>
-                        <li class="nav-item active"><a asp-page="/About" class="nav-link">Về chúng tôi</a></li>
+                        <li class="nav-item active"><a asp-page="/Ai" class="nav-link">AI thú vị</a></li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle cta cta-colored" href="/Cart" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-cart4 text-warning h4"></i>
@@ -263,101 +255,17 @@
                             </ul>
                         </li>
                         <!-- Search Box -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link" href="#" id="searchDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Search" id="searchRedirectButton">
                                 <i class="bi bi-search h4"></i>
                             </a>
-                            <div class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="searchDropdown" style="min-width: 300px;">
-                                <form id="headerSearchForm" class="d-flex" asp-page="/Search">
-                                    <input type="text" name="Query" id="headerSearchInput" class="form-control me-2" placeholder="Tìm món ăn..." autocomplete="off" />
-                                    <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
-                                </form>
-                                <div id="headerSearchResults" class="mt-2" style="max-height: 200px; overflow-y: auto; display: none;"></div>
-                                <div id="headerSearchMessage" class="mt-2 text-danger" style="display: none;"></div>
-                            </div>
                         </li>
+
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-
-
-
-    @section Scripts {
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script>
-            $(document).ready(function () {
-                $('#headerSearchInput').on('input', function () {
-                    var query = $(this).val().trim();
-                    var resultsDiv = $('#headerSearchResults');
-                    var messageDiv = $('#headerSearchMessage');
-
-                    resultsDiv.hide().empty();
-                    messageDiv.hide();
-
-                    if (query.length >= 3) {
-                        $.ajax({
-                            url: '/Search/Suggestions',
-                            method: 'GET',
-                            data: { query: query },
-                            success: function (data) {
-                                console.log('Suggestions response:', data); // Debug
-                                if (data && data.length > 0) {
-                                    data.forEach(function (item) {
-                                        resultsDiv.append(
-                                            `<a href="/Detail?id=${item.id}" class="d-block text-decoration-none text-dark p-2 border-bottom">
-                                                <div class="d-flex align-items-center">
-                                                    <img src="/images/foods/${item.image || 'default.png'}" alt="${item.name}" width="40" height="40" class="me-2 rounded" />
-                                                    <span>${item.name}</span>
-                                                </div>
-                                            </a>`
-                                        );
-                                    });
-                                    resultsDiv.show();
-                                } else {
-                                    messageDiv.text('Không tìm thấy sản phẩm').show();
-                                }
-                            },
-                            error: function (xhr) {
-                                console.error('Suggestions error:', xhr); // Debug
-                                messageDiv.text('Lỗi tìm kiếm, vui lòng thử lại').show();
-                            }
-                        });
-                    }
-                });
-
-                $('#headerSearchForm').on('submit', function (e) {
-                    e.preventDefault();
-                    var query = $('#headerSearchInput').val().trim();
-                    console.log('Submitting search with query:', query); // Debug
-                    if (query.length >= 3) {
-                        window.location.href = `/Search?Query=${encodeURIComponent(query)}`;
-                    } else {
-                        $('#headerSearchMessage').text('Vui lòng nhập ít nhất 3 ký tự').show();
-                    }
-                });
-            });
-        </script>
-        <style>
-            #headerSearchResults a:hover {
-                background-color: #f8f9fa;
-            }
-
-            #headerSearchInput:focus {
-                border-color: #e67700;
-                box-shadow: 0 0 5px rgba(230, 119, 0, 0.5);
-            }
-
-            #headerSearchResults {
-                background-color: #fff;
-                border: 1px solid #ddd;
-                border-radius: 5px;
-            }
-        </style>
-    }
-
 
     <!-- BODY -->
     @if (ViewData["NoContainer"] == null)
@@ -482,7 +390,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
 
-    
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -496,6 +404,5 @@
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 
-    </body>
+</body>
 </html>
-   

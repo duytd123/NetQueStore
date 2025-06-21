@@ -47,6 +47,9 @@ public class CheckOutModel : PageModel
     [BindProperty]
     public string Notes { get; set; }
 
+    [BindProperty]
+    public string ReferrerPhone { get; set; } // Không đánh dấu [Required], cho phép rỗng
+
     [Required(ErrorMessage = "Vui lòng chọn phương thức thanh toán")]
     [BindProperty]
     public int PaymentMethodId { get; set; }
@@ -64,8 +67,11 @@ public class CheckOutModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
-        _logger.LogInformation("OnPostAsync called with FullName: {FullName}, Phone: {Phone}, Email: {Email}, Address: {Address}, PaymentMethodId: {PaymentMethodId}",
-            FullName, Phone, Email, Address, PaymentMethodId);
+        _logger.LogInformation("OnPostAsync called with FullName: {FullName}, Phone: {Phone}, Email: {Email}, Address: {Address}, PaymentMethodId: {PaymentMethodId}, ReferrerPhone: {ReferrerPhone}",
+            FullName, Phone, Email, Address, PaymentMethodId, ReferrerPhone);
+
+        // Loại bỏ validation bắt buộc cho ReferrerPhone
+        ModelState.Remove("ReferrerPhone");
 
         if (!ModelState.IsValid)
         {
@@ -112,16 +118,12 @@ public class CheckOutModel : PageModel
 
         try
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            _logger.LogInformation("Started database transaction for order creation");
-
             int? userId = HttpContext.Session.GetInt32("id");
             string? sessionId = HttpContext.Session.GetString("session_id");
             string? guestEmail = HttpContext.Session.GetString("guest_email");
-            _logger.LogInformation("Session data: UserId={UserId}, SessionId={SessionId}, GuestEmail={GuestEmail}", userId, sessionId, guestEmail);
 
-            var order = new NetQueStore.exe201.Models.Order
-
+            // Tạo thông tin đơn hàng tạm thời
+            var tempOrder = new
             {
                 OrderNumber = GenerateOrderNumber(),
                 BankId = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
@@ -134,42 +136,20 @@ public class CheckOutModel : PageModel
                 DeliveryAddress = Address,
                 DeliveryNotes = Notes,
                 PaymentMethodId = selectedMethod.Id,
-                ShippingFee = cartData.ShippingFee,
-                Subtotal = cartData.Subtotal,
-                TotalAmount = cartData.Total,
+                ShippingFee = cartData.ShippingFee, // decimal, không cần kiểm tra null
+                Subtotal = cartData.Subtotal, // decimal, không cần kiểm tra null
+                TotalAmount = cartData.Total, // decimal, không cần kiểm tra null
                 OrderDate = DateTime.Now,
                 OrderStatus = "created",
                 PaymentStatus = "pending",
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.Now,
+                FoodQuantities = cartData.FoodQuantities,
+                ReferrerPhone = string.IsNullOrEmpty(ReferrerPhone) ? null : ReferrerPhone
             };
 
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
-            _logger.LogInformation("Order created with ID: {OrderId}, OrderNumber: {OrderNumber}", order.Id, order.OrderNumber);
-
-            foreach (var kv in cartData.FoodQuantities)
-            {
-                var food = await _context.Foods.FindAsync(kv.Key);
-                if (food == null) continue;
-
-                var orderItem = new OrderItem
-                {
-                    OrderId = order.Id,
-                    FoodId = food.Id,
-                    ProductName = food.Name,
-                    Quantity = kv.Value,
-                    UnitPrice = food.Price,
-                    Subtotal = food.Price * kv.Value,
-                    CreatedAt = DateTime.Now
-                };
-                _context.OrderItems.Add(orderItem);
-            }
-
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
-            _logger.LogInformation("Transaction committed for order ID: {OrderId}", order.Id);
-
-            Response.Cookies.Delete("shopping_cart");
+            // Lưu thông tin đơn hàng tạm thời vào session
+            HttpContext.Session.SetString("TempOrder", JsonSerializer.Serialize(tempOrder));
+            _logger.LogInformation("Temporary order stored in session: {OrderNumber}", tempOrder.OrderNumber);
 
             if (selectedMethod.Code == "card")
             {
@@ -179,9 +159,9 @@ public class CheckOutModel : PageModel
 
                 var payReq = new PayOSPaymentRequest
                 {
-                    Amount = (int)order.TotalAmount,
-                    Description = $"TT{order.OrderNumber}",
-                    OrderCode = order.BankId?.ToString() ?? "0",
+                    Amount = (int)tempOrder.TotalAmount,
+                    Description = $"TT{tempOrder.OrderNumber}",
+                    OrderCode = tempOrder.BankId.ToString(),
                     ReturnUrl = returnUrl,
                     CancelUrl = cancelUrl
                 };
@@ -193,7 +173,7 @@ public class CheckOutModel : PageModel
                 if (paymentResult == null || string.IsNullOrEmpty(paymentResult.checkoutUrl))
                 {
                     _logger.LogError("Failed to create PayOS payment link for order {OrderNumber}. Amount: {Amount}, OrderCode: {OrderCode}",
-                        order.OrderNumber, payReq.Amount, payReq.OrderCode);
+                        tempOrder.OrderNumber, payReq.Amount, payReq.OrderCode);
                     return new JsonResult(new { success = false, message = "Không thể tạo link thanh toán. Vui lòng thử lại." });
                 }
 
@@ -201,8 +181,13 @@ public class CheckOutModel : PageModel
                 return new JsonResult(new { success = true, redirectUrl = paymentResult.checkoutUrl });
             }
 
-            _logger.LogInformation("Order completed without payment gateway for order ID: {OrderId}", order.Id);
-            return new JsonResult(new { success = true, redirectUrl = Url.Page("/OrderComplete", new { id = order.Id }) });
+            // Xử lý thanh toán bằng cash hoặc các phương thức khác
+            var orderId = await SaveOrderToDatabase(tempOrder);
+            Response.Cookies.Delete("shopping_cart");
+            HttpContext.Session.Remove("TempOrder");
+
+            _logger.LogInformation("Order completed without payment gateway for order number: {OrderNumber}", tempOrder.OrderNumber);
+            return new JsonResult(new { success = true, redirectUrl = Url.Page("/OrderComplete", new { id = orderId }) });
         }
         catch (Exception ex)
         {
@@ -211,13 +196,76 @@ public class CheckOutModel : PageModel
         }
     }
 
+    private async Task<int> SaveOrderToDatabase(dynamic tempOrder)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        _logger.LogInformation("Started database transaction for order creation");
+
+        var order = new NetQueStore.exe201.Models.Order
+        {
+            OrderNumber = tempOrder.OrderNumber,
+            BankId = tempOrder.BankId,
+            UserId = tempOrder.UserId,
+            SessionId = tempOrder.SessionId,
+            GuestEmail = tempOrder.GuestEmail,
+            RecipientName = tempOrder.RecipientName,
+            RecipientPhone = tempOrder.RecipientPhone,
+            RecipientEmail = tempOrder.RecipientEmail,
+            DeliveryAddress = tempOrder.DeliveryAddress,
+            DeliveryNotes = tempOrder.DeliveryNotes,
+            PaymentMethodId = tempOrder.PaymentMethodId,
+            ShippingFee = tempOrder.ShippingFee,          // ✅ Gán trực tiếp, KHÔNG dùng .HasValue
+            Subtotal = tempOrder.Subtotal,                // ✅
+            TotalAmount = tempOrder.TotalAmount,          // ✅
+            OrderDate = tempOrder.OrderDate,
+            OrderStatus = tempOrder.OrderStatus,
+            PaymentStatus = tempOrder.PaymentStatus,
+            CreatedAt = tempOrder.CreatedAt,
+            TrackingNumber = tempOrder.ReferrerPhone
+        };
+
+        _context.Orders.Add(order);
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("Order created with ID: {OrderId}, OrderNumber: {OrderNumber}", order.Id, order.OrderNumber);
+
+        foreach (var kv in tempOrder.FoodQuantities)
+        {
+            var food = await _context.Foods.FindAsync((int)kv.Key);
+            if (food == null) continue;
+
+            var actualPrice = food.SalePrice.HasValue && food.SalePrice.Value > 0 && food.SalePrice.Value < food.Price
+                ? food.SalePrice.Value
+                : food.Price;
+
+            var orderItem = new OrderItem
+            {
+                OrderId = order.Id,
+                FoodId = food.Id,
+                ProductName = food.Name,
+                Quantity = (int)kv.Value,
+                UnitPrice = actualPrice,
+                Subtotal = actualPrice * kv.Value,
+                CreatedAt = DateTime.Now
+            };
+
+            _context.OrderItems.Add(orderItem);
+        }
+
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+        _logger.LogInformation("Transaction committed for order ID: {OrderId}", order.Id);
+
+        return order.Id;
+    }
+
+
     private class CartData
     {
         public Dictionary<int, int> FoodQuantities { get; set; } = new();
         public List<Food> ListOrderItems { get; set; } = new();
-        public decimal Subtotal { get; set; }
-        public decimal ShippingFee { get; set; }
-        public decimal Total { get; set; }
+        public decimal Subtotal { get; set; } // decimal, không nullable
+        public decimal ShippingFee { get; set; } // decimal, không nullable
+        public decimal Total { get; set; } // decimal, không nullable
         public List<PaymentMethod> PaymentMethods { get; set; } = new();
     }
 
@@ -231,7 +279,13 @@ public class CheckOutModel : PageModel
             .Where(f => cart.FoodQuantities.Keys.Contains(f.Id) && f.IsActive)
             .ToList();
 
-        cart.Subtotal = cart.ListOrderItems.Sum(f => f.Price * cart.FoodQuantities[f.Id]);
+        cart.Subtotal = cart.ListOrderItems.Sum(f =>
+        {
+            var price = f.SalePrice.HasValue && f.SalePrice.Value > 0 && f.SalePrice.Value < f.Price
+                ? f.SalePrice.Value
+                : f.Price;
+            return price * cart.FoodQuantities[f.Id];
+        });
 
         int provinceId = 1;
         var provinceIdStr = HttpContext.Session.GetString("province_id");
@@ -245,7 +299,7 @@ public class CheckOutModel : PageModel
 
         if (shippingData != null)
         {
-            if (shippingData.MinOrderValue.HasValue && cart.Subtotal >= shippingData.MinOrderValue.Value)
+            if (shippingData.MinOrderValue > 0 && cart.Subtotal >= shippingData.MinOrderValue)
             {
                 cart.ShippingFee = 0;
             }
@@ -266,6 +320,7 @@ public class CheckOutModel : PageModel
             .OrderBy(pm => pm.DisplayOrder)
             .ToList();
 
+        _logger.LogInformation("Cart data: Subtotal={Subtotal}, ShippingFee={ShippingFee}, Total={Total}", cart.Subtotal, cart.ShippingFee, cart.Total);
         return cart;
     }
 

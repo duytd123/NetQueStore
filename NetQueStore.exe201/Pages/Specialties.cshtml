@@ -54,15 +54,16 @@
                                         <p class="card-text">
                                             @if (food.SalePrice.HasValue && food.SalePrice.Value > 0 && food.SalePrice.Value < food.Price)
                                             {
-                                                <span class="text-decoration-line-through text-muted">@food.Price.ToString("N0") ₫</span>
+                                                <span class="fw-bold text-success">@food.SalePrice.Value.ToString("N0") ₫</span>
 
                                                 <br />
-                                                <span class="fw-bold text-danger">@food.SalePrice.Value.ToString("N0") ₫</span>
+                                                <span class="text-danger text-decoration-line-through">@food.Price.ToString("N0") ₫</span>
                                             }
                                             else
                                             {
-                                                <span class="fw-bold text-primary">@food.Price.ToString("N0") ₫</span>
+                                                <span class="fw-bold text-success">@food.Price.ToString("N0") ₫</span>
                                             }
+
                                         </p>
                                     </div>
                                     <div class="mt-2">

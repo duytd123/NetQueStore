@@ -8,30 +8,34 @@
 <div class="container mt-4">
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success mt-3">
+        <div class="alert alert-success mt-3 alert-dismissible fade show" role="alert">
             @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger mt-3">
+        <div class="alert alert-danger mt-3 alert-dismissible fade show" role="alert">
             @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
     <!-- COUPON SECTION -->
     <div class="mb-4">
         <a href="#" id="toggleCoupon" class="text-success d-block fw-semibold">
-            Bạn có mã giảm giá? Ấn vào đây để nhập mã
+            Bạn có mã người giới thiệu không? Ấn vào đây để nhập mã
         </a>
         <div id="couponForm" class="mt-2 p-3 border border-success" style="display: none;">
-            <input type="text" class="form-control mb-2" placeholder="Nếu bạn có mã giảm giá, vui lòng áp dụng bên dưới." />
-            <button type="button" class="btn btn-success">ÁP DỤNG MÃ GIẢM GIÁ</button>
+            <input type="text" id="referrerPhoneInput" class="form-control mb-2" placeholder="Nhập số điện thoại người giới thiệu (10 chữ số)" maxlength="10" />
+            <div id="referrerPhoneMessage" class="mt-2" style="display: none;"></div>
+            <button type="button" id="applyReferrerPhone" class="btn btn-success">ÁP DỤNG SDT NGƯỜI GIỚI THIỆU</button>
         </div>
     </div>
 
     <form method="post" id="checkoutForm" asp-page="/Checkout">
         @Html.AntiForgeryToken()
+        <input type="hidden" id="ReferrerPhone" asp-for="ReferrerPhone" />
         <div class="row">
             <!-- Left: Billing -->
             <div class="col-md-7">
@@ -68,8 +72,23 @@
                         @foreach (var item in Model.ListOrderItems)
                         {
                             <div class="d-flex justify-content-between">
-                                <span>Sản phẩm: @item.Name × @Model.FoodQuantities[item.Id]</span>
-                                <span>@String.Format("{0:N0}₫", item.Price * Model.FoodQuantities[item.Id])</span>
+                                @{
+                                    var quantity = Model.FoodQuantities[item.Id];
+                                    var hasSale = item.SalePrice.HasValue && item.SalePrice.Value < item.Price;
+                                    var unitPrice = hasSale ? item.SalePrice.Value : item.Price;
+                                }
+                                <span>
+                                    Sản phẩm: @item.Name × @quantity <br />
+                                    @if (hasSale)
+                                    {
+                                        <span class="text-success fw-bold">@unitPrice.ToString("N0")₫</span>
+                                        <small class="text-danger text-decoration-line-through ms-1">@item.Price.ToString("N0")₫</small>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-success fw-bold">@unitPrice.ToString("N0")₫</span>
+                                    }
+                                </span>
                             </div>
                         }
                     </div>
@@ -127,11 +146,45 @@
                 e.preventDefault();
                 const form = $("#couponForm");
                 form.slideToggle();
+                $("#referrerPhoneMessage").hide();
+            });
+
+            // Apply referrer phone
+            $("#applyReferrerPhone").click(function () {
+                const referrerPhone = $("#referrerPhoneInput").val().trim();
+                const messageDiv = $("#referrerPhoneMessage");
+
+                if (!referrerPhone) {
+                    messageDiv.removeClass("alert-success").addClass("alert-danger")
+                        .text("Vui lòng nhập số điện thoại người giới thiệu.")
+                        .show();
+                    return;
+                }
+
+                if (!/^[0][3|5|7|8|9][0-9]{8}$/.test(referrerPhone)) {
+                    messageDiv.removeClass("alert-success").addClass("alert-danger")
+                        .text("Số điện thoại không hợp lệ. Vui lòng nhập 10 chữ số, bắt đầu bằng 03, 05, 07, 08 hoặc 09.")
+                        .show();
+                    return;
+                }
+
+                $("#ReferrerPhone").val(referrerPhone);
+                messageDiv.removeClass("alert-danger").addClass("alert-success")
+                    .text("Số điện thoại người giới thiệu đã được áp dụng thành công!")
+                    .show();
+
+                setTimeout(() => {
+                    messageDiv.fadeOut();
+                }, 3000);
+            });
+
+            $("#referrerPhoneInput").on("input", function () {
+                $("#referrerPhoneMessage").hide();
             });
 
             // Auto-hide alerts
             setTimeout(() => {
-                $('.alert').fadeOut('slow', function () { $(this).remove(); });
+                $('.alert').not('#referrerPhoneMessage').fadeOut('slow', function () { $(this).remove(); });
             }, 5000);
 
             // Form submission with AJAX
@@ -153,12 +206,11 @@
                     },
                     success: function (response) {
                         console.log('Checkout response:', response);
-                        if (response.redirectUrl) {
+                        if (response.success && response.redirectUrl) {
                             window.location.href = response.redirectUrl;
                         } else {
-                            document.open();
-                            document.write(response);
-                            document.close();
+                            errorDiv.text(response.message || 'Lỗi không xác định khi đặt hàng.').show();
+                            button.prop('disabled', false).text('ĐẶT HÀNG');
                         }
                     },
                     error: function (xhr) {

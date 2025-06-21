@@ -18,12 +18,22 @@
                         <div class="card-body p-4">
                             <h2 class="card-title fw-bold mb-3">@Model.Food.Name</h2>
                             <p class="text-muted mb-2">Danh mục: <strong>@(Model.Food.Category?.Name ?? "Không rõ")</strong></p>
-                            <h3 class="text-success fw-semibold mb-4">@Model.Food.Price.ToString("N0") ₫</h3>
+                            @if (Model.Food.SalePrice != null && Model.Food.SalePrice > 0)
+                            {
+                                <h3 class="text-success fw-semibold mb-1">@Model.Food.SalePrice.Value.ToString("N0") ₫</h3>
+                                <p class="text-danger text-decoration-line-through">@Model.Food.Price.ToString("N0") ₫</p>
+                            }
+                            else
+                            {
+                                <h3 class="text-success fw-semibold mb-4">@Model.Food.Price.ToString("N0") ₫</h3>
+                            }
+
+
 
                             <div class="mb-3">
                                 @* Rating dynamic: ví dụ có 4 sao *@
                                 @{
-                                    int rating = 5; // hoặc lấy từ model
+                                    int rating = 5; 
                                 }
                                 @for (int i = 1; i <= 5; i++)
                                 {
@@ -85,8 +95,19 @@
                                     <img src="/images/foods/@img" alt="@product.Name" width="56" height="56" class="rounded me-3 object-fit-cover" />
                                     <div class="flex-grow-1">
                                         <div class="fw-semibold">@product.Name</div>
-                                        <small class="text-success fw-semibold">@product.Price.ToString("N0") ₫</small>
+                                        @if (product.SalePrice != null && product.SalePrice > 0)
+                                        {
+                                            <div>
+                                                <small class="text-success fw-semibold">@product.SalePrice.Value.ToString("N0") ₫</small><br />
+                                                <small class="text-danger text-decoration-line-through">@product.Price.ToString("N0") ₫</small>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <small class="text-success fw-semibold">@product.Price.ToString("N0") ₫</small>
+                                        }
                                     </div>
+
                                 </a>
                                 <span>
                                     <i class="fa fa-star text-warning"></i>

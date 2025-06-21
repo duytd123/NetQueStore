@@ -12,7 +12,9 @@
 
     var foodsInCart = _context.Foods.Include(f => f.FoodImages).Where(f => foodQuantities.Keys.Contains(f.Id) && f.IsActive).ToList();
 
-    decimal subtotal = foodsInCart.Sum(f => f.Price * foodQuantities[f.Id]);
+    // Tính subtotal sử dụng SalePrice nếu có
+    decimal subtotal = foodsInCart.Sum(f =>
+        (f.SalePrice.HasValue && f.SalePrice < f.Price ? f.SalePrice.Value : f.Price) * foodQuantities[f.Id]);
 
     string? provinceIdStr = HttpContextAccessor.HttpContext.Session.GetString("province_id");
     int provinceId = int.TryParse(provinceIdStr, out int pid) ? pid : 1;
@@ -32,6 +34,8 @@ else
             @foreach (var item in foodsInCart)
             {
                 int qty = foodQuantities[item.Id];
+                // Sử dụng SalePrice nếu có và nhỏ hơn Price
+                decimal priceToUse = item.SalePrice.HasValue && item.SalePrice < item.Price ? item.SalePrice.Value : item.Price;
                 <div class="d-flex align-items-center mb-2">
                     <img src="/images/foods/@(item.FoodImages.FirstOrDefault(fi => fi.IsPrimary)?.Filename ?? "default.png")" width="50" class="rounded" alt="@item.Name" />
                     <div class="ms-2 flex-grow-1">
@@ -40,7 +44,7 @@ else
                             <button class="btn btn-sm btn-outline-secondary px-2 py-0" onclick="return updateCart('decrease', @item.Id)">-</button>
                             <span class="mx-1">@qty</span>
                             <button class="btn btn-sm btn-outline-secondary px-2 py-0" onclick="return updateCart('increase', @item.Id)">+</button>
-                            x @(item.Price.ToString("N0")) ₫ = @((qty * item.Price).ToString("N0"))
+                            x @priceToUse.ToString("N0") ₫ = @((qty * priceToUse).ToString("N0"))
                         </small>
                     </div>
                     <a href="#" class="text-danger" onclick="return updateCart('delete', @item.Id)">Xóa</a>
@@ -119,4 +123,3 @@ else
         return '';
     }
 </script>
-

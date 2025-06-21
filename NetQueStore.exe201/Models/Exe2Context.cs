@@ -861,8 +861,8 @@ public partial class Exe2Context : DbContext
                 .IsUnicode(false)
                 .HasColumnName("delivery_address");
             entity.Property(e => e.DeliveryNotes)
-                .HasColumnType("text")
-                .HasColumnName("delivery_notes");
+    .HasColumnType("nvarchar(200)")
+    .HasColumnName("delivery_notes");
             entity.Property(e => e.Discount)
                 .HasColumnType("decimal(16, 2)")
                 .HasColumnName("discount");
@@ -902,9 +902,9 @@ public partial class Exe2Context : DbContext
                 .IsUnicode(false)
                 .HasColumnName("recipient_email");
             entity.Property(e => e.RecipientName)
-                .HasMaxLength(200)
-                .IsUnicode(false)
-                .HasColumnName("recipient_name");
+    .HasMaxLength(200)
+    .IsUnicode(true)
+    .HasColumnName("recipient_name");
             entity.Property(e => e.RecipientPhone)
                 .HasMaxLength(20)
                 .IsUnicode(false)

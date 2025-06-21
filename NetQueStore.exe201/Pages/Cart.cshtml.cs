@@ -116,9 +116,14 @@ namespace NetQueStore.exe201.Pages
             {
                 if (FoodQuantities.TryGetValue(food.Id, out int qty))
                 {
-                    Subtotal += food.Price * qty;
+                    decimal priceToUse = (food.SalePrice.HasValue && food.SalePrice.Value > 0 && food.SalePrice.Value < food.Price)
+                        ? food.SalePrice.Value
+                        : food.Price;
+
+                    Subtotal += priceToUse * qty;
                 }
             }
+
 
             // Lấy provinceId từ Session hoặc mặc định
             int provinceId = 1; // default provinceId
